@@ -34,10 +34,18 @@ class DashboardTest extends TestCase
             ->assertSee('data-ui="mobile-dashboard-nav"', false)
             ->assertSee('padding-bottom: env(safe-area-inset-bottom)', false)
             ->assertSee('data-page="ringkasan"', false)
-            ->assertSee('aria-current="page"', false);
+            ->assertSee('aria-current="page"', false)
+            ->assertSee('scope="row"', false);
 
-        $this->assertGreaterThanOrEqual(3, substr_count($response->getContent(), 'editorial-card'));
-        $this->assertGreaterThanOrEqual(3, substr_count($response->getContent(), 'editorial-eyebrow'));
+        $html = $response->getContent();
+
+        $this->assertGreaterThanOrEqual(3, substr_count($html, 'editorial-card'));
+        $this->assertGreaterThanOrEqual(3, substr_count($html, 'editorial-eyebrow'));
+        $this->assertSame(2, substr_count($html, 'data-ui="overview-chart-card"'));
+        $this->assertSame(1, substr_count($html, 'data-ui="overview-table-card"'));
+        $this->assertMatchesRegularExpression('/<h2\\b[^>]*>\\s*Rata-rata Pemain Aktif per Genre\\s*<\\/h2>/s', $html);
+        $this->assertMatchesRegularExpression('/<h2\\b[^>]*>\\s*Komposisi Genre \\(%\\)\\s*<\\/h2>/s', $html);
+        $this->assertMatchesRegularExpression('/<h2\\b[^>]*>\\s*Ranking Genre\\s*<\\/h2>/s', $html);
     }
 
     public function test_saturasi_page_ok(): void
@@ -71,6 +79,9 @@ class DashboardTest extends TestCase
             '*/api/genre/saturation' => Http::response(['data' => []], 500),
             '*/api/viral-muda*' => Http::response(['max_umur' => 90, 'data' => []], 500),
         ]);
-        $this->get('/dashboard')->assertStatus(200)->assertSee('Server analisis mengembalikan error.');
+        $this->get('/dashboard')
+            ->assertStatus(200)
+            ->assertSee('Server analisis mengembalikan error.')
+            ->assertSee('Belum ada data ranking.');
     }
 }

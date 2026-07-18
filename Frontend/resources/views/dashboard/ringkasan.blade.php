@@ -15,69 +15,81 @@
         </div>
 
         <div class="grid gap-6 xl:grid-cols-2">
-            <x-ui.card variant="sectioned" class="editorial-card">
+            <x-ui.card variant="sectioned" class="editorial-card" data-ui="overview-chart-card">
                 <x-ui.card-header>
                     <p class="editorial-eyebrow">Demand / Active players</p>
-                    <x-ui.card-title as="h2">Rata-rata Pemain Aktif per Genre</x-ui.card-title>
+                    <h2 class="leading-none font-semibold">Rata-rata Pemain Aktif per Genre</h2>
                 </x-ui.card-header>
                 <x-ui.card-content>
-                    <div id="rankingchart" aria-hidden="true"></div>
-                    <div class="sr-only">
-                        <h3>Data rata-rata pemain aktif per genre</h3>
-                        <ul>
-                            @foreach ($ranking['ranking'] as $row)
-                                <li>{{ $row['genreL1'] }}: {{ round($row['avg_playing']) }} pemain aktif rata-rata</li>
-                            @endforeach
-                        </ul>
-                    </div>
+                    @if (count($ranking['ranking']))
+                        <div id="rankingchart" aria-hidden="true"></div>
+                        <div class="sr-only">
+                            <h3>Data rata-rata pemain aktif per genre</h3>
+                            <ul>
+                                @foreach ($ranking['ranking'] as $row)
+                                    <li>{{ $row['genreL1'] }}: {{ round($row['avg_playing']) }} pemain aktif rata-rata</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @else
+                        <p class="text-sm text-muted-foreground">Belum ada data ranking.</p>
+                    @endif
                 </x-ui.card-content>
             </x-ui.card>
 
-            <x-ui.card variant="sectioned" class="editorial-card">
+            <x-ui.card variant="sectioned" class="editorial-card" data-ui="overview-chart-card">
                 <x-ui.card-header>
                     <p class="editorial-eyebrow">Supply / Share</p>
-                    <x-ui.card-title as="h2">Komposisi Genre (%)</x-ui.card-title>
+                    <h2 class="leading-none font-semibold">Komposisi Genre (%)</h2>
                 </x-ui.card-header>
                 <x-ui.card-content>
-                    <div id="sharechart" aria-hidden="true"></div>
-                    <div class="sr-only">
-                        <h3>Data komposisi genre</h3>
-                        <ul>
-                            @foreach ($ranking['share'] as $genre => $share)
-                                <li>{{ $genre }}: {{ $share }}%</li>
-                            @endforeach
-                        </ul>
-                    </div>
+                    @if (count($ranking['share']))
+                        <div id="sharechart" aria-hidden="true"></div>
+                        <div class="sr-only">
+                            <h3>Data komposisi genre</h3>
+                            <ul>
+                                @foreach ($ranking['share'] as $genre => $share)
+                                    <li>{{ $genre }}: {{ $share }}%</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @else
+                        <p class="text-sm text-muted-foreground">Belum ada data komposisi genre.</p>
+                    @endif
                 </x-ui.card-content>
             </x-ui.card>
         </div>
 
-        <x-ui.card variant="sectioned" class="editorial-card">
+        <x-ui.card variant="sectioned" class="editorial-card" data-ui="overview-table-card">
             <x-ui.card-header>
                 <p class="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Market leaderboard</p>
-                <x-ui.card-title as="h2">Ranking Genre</x-ui.card-title>
+                <h2 id="ranking-genre-title" class="leading-none font-semibold">Ranking Genre</h2>
             </x-ui.card-header>
             <x-ui.card-content>
-                <x-ui.table>
-                    <x-ui.table-header>
-                        <x-ui.table-row>
-                            <x-ui.table-head>Genre</x-ui.table-head>
-                            <x-ui.table-head>Game</x-ui.table-head>
-                            <x-ui.table-head>Avg Playing</x-ui.table-head>
-                            <x-ui.table-head>Avg Rating</x-ui.table-head>
-                        </x-ui.table-row>
-                    </x-ui.table-header>
-                    <x-ui.table-body>
-                        @foreach ($ranking['ranking'] as $row)
+                @if (count($ranking['ranking']))
+                    <x-ui.table aria-labelledby="ranking-genre-title">
+                        <x-ui.table-header>
                             <x-ui.table-row>
-                                <x-ui.table-cell class="font-medium">{{ $row['genreL1'] }}</x-ui.table-cell>
-                                <x-ui.table-cell>{{ $row['game_count'] }}</x-ui.table-cell>
-                                <x-ui.table-cell>{{ round($row['avg_playing']) }}</x-ui.table-cell>
-                                <x-ui.table-cell>{{ round($row['avg_rating'], 1) }}</x-ui.table-cell>
+                                <x-ui.table-head>Genre</x-ui.table-head>
+                                <x-ui.table-head>Game</x-ui.table-head>
+                                <x-ui.table-head>Avg Playing</x-ui.table-head>
+                                <x-ui.table-head>Avg Rating</x-ui.table-head>
                             </x-ui.table-row>
-                        @endforeach
-                    </x-ui.table-body>
-                </x-ui.table>
+                        </x-ui.table-header>
+                        <x-ui.table-body>
+                            @foreach ($ranking['ranking'] as $row)
+                                <x-ui.table-row>
+                                    <th scope="row" class="p-2 align-middle whitespace-nowrap font-medium">{{ $row['genreL1'] }}</th>
+                                    <x-ui.table-cell>{{ $row['game_count'] }}</x-ui.table-cell>
+                                    <x-ui.table-cell>{{ round($row['avg_playing']) }}</x-ui.table-cell>
+                                    <x-ui.table-cell>{{ round($row['avg_rating'], 1) }}</x-ui.table-cell>
+                                </x-ui.table-row>
+                            @endforeach
+                        </x-ui.table-body>
+                    </x-ui.table>
+                @else
+                    <p class="text-sm text-muted-foreground">Belum ada data ranking.</p>
+                @endif
             </x-ui.card-content>
         </x-ui.card>
     </section>
@@ -87,21 +99,25 @@
             const ranking = @json($ranking['ranking']);
             const share = @json($ranking['share']);
 
-            registerChart(document.querySelector('#rankingchart'), {
-                chart: { type: 'bar', height: 340, toolbar: { show: false } },
-                plotOptions: { bar: { borderRadius: 2, columnWidth: '58%' } },
-                series: [{ name: 'Avg Playing', data: ranking.map(row => Math.round(row.avg_playing)) }],
-                xaxis: { categories: ranking.map(row => row.genreL1) },
-                dataLabels: { enabled: false },
-            });
+            if (ranking.length) {
+                registerChart(document.querySelector('#rankingchart'), {
+                    chart: { type: 'bar', height: 340, toolbar: { show: false } },
+                    plotOptions: { bar: { borderRadius: 2, columnWidth: '58%' } },
+                    series: [{ name: 'Avg Playing', data: ranking.map(row => Math.round(row.avg_playing)) }],
+                    xaxis: { categories: ranking.map(row => row.genreL1) },
+                    dataLabels: { enabled: false },
+                });
+            }
 
-            registerChart(document.querySelector('#sharechart'), {
-                chart: { type: 'donut', height: 340, toolbar: { show: false } },
-                series: Object.values(share),
-                labels: Object.keys(share),
-                dataLabels: { enabled: false },
-                legend: { position: 'bottom' },
-            });
+            if (Object.keys(share).length) {
+                registerChart(document.querySelector('#sharechart'), {
+                    chart: { type: 'donut', height: 340, toolbar: { show: false } },
+                    series: Object.values(share),
+                    labels: Object.keys(share),
+                    dataLabels: { enabled: false },
+                    legend: { position: 'bottom' },
+                });
+            }
         });
     </script>
 @endsection
