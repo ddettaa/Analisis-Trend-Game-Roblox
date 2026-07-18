@@ -1,5 +1,6 @@
 import ApexCharts from 'apexcharts';
 import './blatui';
+import { chartAnimationOptions } from './chart-preferences';
 
 window.ApexCharts = ApexCharts;
 
@@ -21,6 +22,13 @@ const chartTheme = () => ({
 const syncColorScheme = () => {
     document.documentElement.style.colorScheme = chartTheme().mode;
 };
+const prefersReducedMotion = () => {
+    try {
+        return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+        return false;
+    }
+};
 
 window._charts = [];
 const chartMetadata = new WeakMap();
@@ -41,6 +49,7 @@ window.registerChart = (el, options = {}) => {
             background: 'transparent',
             foreColor: theme.foreColor,
             fontFamily: 'inherit',
+            animations: chartAnimationOptions(options.chart?.animations || {}, prefersReducedMotion()),
         },
         grid: { ...(options.grid || {}), ...(autoGrid ? { borderColor: theme.grid } : {}) },
     });
