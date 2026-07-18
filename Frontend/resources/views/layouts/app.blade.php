@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Analisis Trend Roblox</title>
     <script>
-        try { const m = localStorage.getItem('theme:mode'); if (m === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
+        try { const m = localStorage.getItem('theme:mode'); if (m === 'dark' || ((!m || m === 'system') && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark'); } catch (e) {}
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

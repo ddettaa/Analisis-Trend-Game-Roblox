@@ -18,7 +18,7 @@ import Alpine from 'alpinejs';
 import { registerBlatUI } from './blatui-core.js';
 
 if (!window.Alpine) {
-    registerBlatUI(Alpine);
+    registerBlatUI(Alpine, { darkMode: 'system' });
     window.Alpine = Alpine;
     Alpine.start();
 }
