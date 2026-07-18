@@ -1,5 +1,5 @@
 import pandas as pd
-from cleaning import clean_games
+from cleaning import clean_games, derive_columns
 
 
 def _row(**kw):
@@ -60,3 +60,24 @@ def test_umur_hari_is_int_dtype():
     df = pd.DataFrame([_row(), _row(uid="2")])
     clean, _ = clean_games(df)
     assert clean["umur_hari"].dtype.kind == "i"  # integer
+
+
+def test_derive_columns_adds_umur_and_ppd():
+    df = pd.DataFrame([_row(
+        created="2020-01-01T00:00:00.000Z", updated="2020-01-11T00:00:00.000Z", playing=100
+    )])
+    df["created"] = pd.to_datetime(df["created"], errors="coerce", utc=True)
+    df["updated"] = pd.to_datetime(df["updated"], errors="coerce", utc=True)
+    out = derive_columns(df)
+    assert out.iloc[0]["umur_hari"] == 10
+    assert out.iloc[0]["playing_per_hari"] == 10.0
+
+
+def test_derive_columns_ppd_zero_when_umur_zero():
+    df = pd.DataFrame([_row(
+        created="2020-01-01T00:00:00.000Z", updated="2020-01-01T00:00:00.000Z", playing=100
+    )])
+    df["created"] = pd.to_datetime(df["created"], errors="coerce", utc=True)
+    df["updated"] = pd.to_datetime(df["updated"], errors="coerce", utc=True)
+    out = derive_columns(df)
+    assert out.iloc[0]["playing_per_hari"] == 0.0

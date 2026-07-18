@@ -1,6 +1,15 @@
 import pandas as pd
 
 
+def derive_columns(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df["umur_hari"] = (df["updated"] - df["created"]).dt.days.astype(int)
+    df["playing_per_hari"] = (
+        df["playing"] / df["umur_hari"].replace(0, pd.NA)
+    ).fillna(0).round(2)
+    return df
+
+
 def clean_games(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     df = df.copy()
     report = {
@@ -35,18 +44,14 @@ def clean_games(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     df["rating"] = (df["totalUpVotes"].fillna(0) / total_votes * 100).round(2)
     df["rating"] = df["rating"].fillna(0.0)
 
-    # umur_hari & buang umur negatif
-    df["umur_hari"] = (df["updated"] - df["created"]).dt.days
+    # umur_hari mentah & buang umur negatif (perlu sebelum drop)
+    raw_umur_hari = (df["updated"] - df["created"]).dt.days
     before = len(df)
-    df = df[~(df["umur_hari"] < 0)]
+    df = df[~(raw_umur_hari < 0)]
     report["dropped_negative_age"] = before - len(df)
 
-    # umur_hari aman di-cast ke int setelah baris NaT & negatif dibuang
-    df["umur_hari"] = df["umur_hari"].astype(int)
-
-    # playing_per_hari (hindari bagi nol -> 0)
-    df["playing_per_hari"] = (
-        df["playing"] / df["umur_hari"].replace(0, pd.NA)
-    ).fillna(0).round(2)
+    # umur_hari (int) & playing_per_hari final, dihitung ulang lewat derive_columns
+    # setelah baris NaT & negatif dibuang (aman untuk di-cast ke int)
+    df = derive_columns(df)
 
     return df, report
