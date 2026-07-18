@@ -6,10 +6,14 @@
     <title>Analisis Trend Roblox</title>
     <script>
         (() => {
-            const mode = localStorage.getItem('theme:mode') || 'system';
-            const dark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.documentElement.classList.toggle('dark', dark);
-            document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+            try {
+                const mode = localStorage.getItem('theme:mode') || 'system';
+                const dark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.toggle('dark', dark);
+                document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+            } catch {
+                // Preserve the browser default when storage or media preferences are unavailable.
+            }
         })();
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -62,7 +66,7 @@
         </div>
     </section>
 
-    @if ($snapshot)
+    @if ($status === 'ok' && $snapshot)
         <section aria-labelledby="metrics-heading" class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
             <div class="mx-auto max-w-7xl">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -126,9 +130,14 @@
                 <x-ui.card class="overflow-hidden">
                     <div class="border-b border-border px-6 py-5 sm:px-8">
                         <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">Live ranking</p>
-                        <h2 class="mt-2 text-xl font-bold tracking-tight">Genre berdasarkan jumlah game</h2>
+                        <h2 id="genre-ranking-heading" class="mt-2 text-xl font-bold tracking-tight">Genre berdasarkan jumlah game</h2>
                     </div>
-                    <div id="minichart" class="px-2 py-4 sm:px-6"></div>
+                    <div id="minichart" aria-hidden="true" class="px-2 py-4 sm:px-6"></div>
+                    <ol data-ui="genre-ranking-list" class="sr-only" aria-label="Top 5 genre berdasarkan jumlah game">
+                        @foreach (array_slice($rankingItems, 0, 5) as $genre)
+                            <li>{{ $loop->iteration }}. {{ $genre['genreL1'] }}: {{ number_format((int) $genre['game_count'], 0, ',', '.') }} game</li>
+                        @endforeach
+                    </ol>
                 </x-ui.card>
                 <script>
                     document.addEventListener('DOMContentLoaded', () => {

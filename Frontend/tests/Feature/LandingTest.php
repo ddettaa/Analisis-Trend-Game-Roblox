@@ -22,6 +22,9 @@ class LandingTest extends TestCase
             ->assertSee('Decode what Roblox plays.')
             ->assertSee('data-page="landing"', false)
             ->assertSee('data-ui="ascii-field"', false)
+            ->assertSee('sm:block', false)
+            ->assertSee('data-ui="genre-ranking-list"', false)
+            ->assertSee('try {', false)
             ->assertSee('Simulation');
 
         $this->assertSame(1, substr_count($response->getContent(), 'href="/"'));
@@ -55,5 +58,21 @@ class LandingTest extends TestCase
             'Belum terbaca',
             'Ranking genre belum tersedia',
         ], false);
+    }
+
+    public function test_landing_reports_ranking_endpoint_failure(): void
+    {
+        Http::fake(function ($request) {
+            if (str_ends_with($request->url(), '/api/snapshot')) {
+                return Http::response(['snapshot_id' => 3, 'taken_at' => '2026-07-18T10:00:00Z', 'game_count' => 42], 200);
+            }
+
+            throw new \Illuminate\Http\Client\ConnectionException('refused');
+        });
+
+        $this->get('/')->assertOk()
+            ->assertSee('Decode what Roblox plays.')
+            ->assertSee('Lihat Dashboard')
+            ->assertSee('Server analisis tidak aktif.');
     }
 }

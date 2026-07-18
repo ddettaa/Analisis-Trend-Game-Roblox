@@ -18,6 +18,10 @@ const chartTheme = () => ({
     grid: cssToken('--border', '#e4e4e7'),
 });
 
+const syncColorScheme = () => {
+    document.documentElement.style.colorScheme = chartTheme().mode;
+};
+
 window._charts = [];
 const chartMetadata = new WeakMap();
 const hasOwn = (object, property) => Object.prototype.hasOwnProperty.call(object, property);
@@ -49,6 +53,7 @@ window.registerChart = (el, options = {}) => {
 
 new MutationObserver(() => {
     const theme = chartTheme();
+    syncColorScheme();
     window._charts.forEach(chart => {
         const metadata = chartMetadata.get(chart);
         const updates = {
@@ -62,3 +67,5 @@ new MutationObserver(() => {
         chart.updateOptions(updates);
     });
 }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+syncColorScheme();
