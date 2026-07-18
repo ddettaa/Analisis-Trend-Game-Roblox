@@ -5,7 +5,7 @@
         <x-analytics.page-heading
             eyebrow="Market pulse / Live snapshot"
             title="Genre intelligence."
-            description="Pantau komposisi genre Roblox, pemain aktif, dan kualitas untuk membaca peluang pasar dengan lebih jelas."
+            description="Baca komposisi pasar Roblox, pemain aktif, dan kualitas rata-rata setiap genre dalam satu workspace."
         />
 
         <div class="grid gap-4 sm:grid-cols-3">
@@ -15,9 +15,9 @@
         </div>
 
         <div class="grid gap-6 xl:grid-cols-2">
-            <x-ui.card variant="sectioned">
+            <x-ui.card variant="sectioned" class="editorial-card">
                 <x-ui.card-header>
-                    <p class="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Demand / Active players</p>
+                    <p class="editorial-eyebrow">Demand / Active players</p>
                     <x-ui.card-title as="h2">Rata-rata Pemain Aktif per Genre</x-ui.card-title>
                 </x-ui.card-header>
                 <x-ui.card-content>
@@ -33,9 +33,9 @@
                 </x-ui.card-content>
             </x-ui.card>
 
-            <x-ui.card variant="sectioned">
+            <x-ui.card variant="sectioned" class="editorial-card">
                 <x-ui.card-header>
-                    <p class="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Supply / Share</p>
+                    <p class="editorial-eyebrow">Supply / Share</p>
                     <x-ui.card-title as="h2">Komposisi Genre (%)</x-ui.card-title>
                 </x-ui.card-header>
                 <x-ui.card-content>
@@ -52,7 +52,7 @@
             </x-ui.card>
         </div>
 
-        <x-ui.card variant="sectioned">
+        <x-ui.card variant="sectioned" class="editorial-card">
             <x-ui.card-header>
                 <p class="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Market leaderboard</p>
                 <x-ui.card-title as="h2">Ranking Genre</x-ui.card-title>

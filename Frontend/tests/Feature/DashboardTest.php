@@ -20,10 +20,13 @@ class DashboardTest extends TestCase
     public function test_ringkasan_page_ok(): void
     {
         $this->fakeAll();
-        $this->get('/dashboard')
+        $response = $this->get('/dashboard');
+
+        $response
             ->assertStatus(200)
             ->assertSee('Adventure')
             ->assertSee('Genre intelligence')
+            ->assertSee('Baca komposisi pasar Roblox, pemain aktif, dan kualitas rata-rata setiap genre dalam satu workspace.')
             ->assertSee('data-workspace="ringkasan"', false)
             ->assertSeeInOrder(['Total Game', 'Jumlah Genre', 'Rating Rata-rata', 'Ranking Genre'])
             ->assertSee('ROBLOX.TRENDS')
@@ -32,6 +35,9 @@ class DashboardTest extends TestCase
             ->assertSee('padding-bottom: env(safe-area-inset-bottom)', false)
             ->assertSee('data-page="ringkasan"', false)
             ->assertSee('aria-current="page"', false);
+
+        $this->assertGreaterThanOrEqual(3, substr_count($response->getContent(), 'editorial-card'));
+        $this->assertGreaterThanOrEqual(3, substr_count($response->getContent(), 'editorial-eyebrow'));
     }
 
     public function test_saturasi_page_ok(): void
