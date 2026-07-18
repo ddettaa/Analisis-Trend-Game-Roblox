@@ -8,10 +8,10 @@ import './blatui';
 
 window.ApexCharts = ApexCharts;
 
-// ── Tema: default ikut sistem, persist di localStorage ──
-if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark');
-}
+// ── Tema: BlatUI's Alpine store ($store.theme, localStorage key `theme:mode`) is the
+// single source of truth for dark mode — see blatui-core.js. Do NOT bootstrap dark
+// mode here too; that would create two conflicting authorities toggling the `dark`
+// class. This file only reacts to the class (via the MutationObserver below).
 
 // ── Chart registry theme-aware ──
 const isDark = () => document.documentElement.classList.contains('dark');

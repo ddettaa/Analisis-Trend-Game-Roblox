@@ -12,12 +12,14 @@
     </table>
 
     <script>
-        const sat = @json($saturation['data']);
-        const colorFor = s => s === 'oversaturated' ? '#e74c3c' : (s === 'emerging' ? '#2ecc71' : '#95a5a6');
-        new ApexCharts(document.querySelector("#satchart"), {
-            chart: { type: 'bar', height: 360 },
-            series: [{ name: 'Jumlah Game', data: sat.map(r => ({ x: r.genreL1, y: r.game_count, fillColor: colorFor(r.status) })) }],
-            title: { text: 'Jumlah Game per Genre (warna = status saturasi)' }
-        }).render();
+        document.addEventListener('DOMContentLoaded', () => {
+            const sat = @json($saturation['data']);
+            const colorFor = s => s === 'oversaturated' ? '#e74c3c' : (s === 'emerging' ? '#2ecc71' : '#95a5a6');
+            registerChart(document.querySelector("#satchart"), {
+                chart: { type: 'bar', height: 360 },
+                series: [{ name: 'Jumlah Game', data: sat.map(r => ({ x: r.genreL1, y: r.game_count, fillColor: colorFor(r.status) })) }],
+                title: { text: 'Jumlah Game per Genre (warna = status saturasi)' }
+            });
+        });
     </script>
 @endsection

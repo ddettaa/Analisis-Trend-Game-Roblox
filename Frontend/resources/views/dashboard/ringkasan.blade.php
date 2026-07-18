@@ -13,19 +13,21 @@
     </table>
 
     <script>
-        const share = @json($ranking['share']);
-        const ranking = @json($ranking['ranking']);
-        new ApexCharts(document.querySelector("#sharechart"), {
-            chart: { type: 'pie', height: 320 },
-            series: Object.values(share),
-            labels: Object.keys(share),
-            title: { text: 'Komposisi Genre (%)' }
-        }).render();
-        new ApexCharts(document.querySelector("#rankingchart"), {
-            chart: { type: 'bar', height: 360 },
-            series: [{ name: 'Avg Playing', data: ranking.map(r => Math.round(r.avg_playing)) }],
-            xaxis: { categories: ranking.map(r => r.genreL1) },
-            title: { text: 'Rata-rata Pemain Aktif per Genre' }
-        }).render();
+        document.addEventListener('DOMContentLoaded', () => {
+            const share = @json($ranking['share']);
+            const ranking = @json($ranking['ranking']);
+            registerChart(document.querySelector("#sharechart"), {
+                chart: { type: 'pie', height: 320 },
+                series: Object.values(share),
+                labels: Object.keys(share),
+                title: { text: 'Komposisi Genre (%)' }
+            });
+            registerChart(document.querySelector("#rankingchart"), {
+                chart: { type: 'bar', height: 360 },
+                series: [{ name: 'Avg Playing', data: ranking.map(r => Math.round(r.avg_playing)) }],
+                xaxis: { categories: ranking.map(r => r.genreL1) },
+                title: { text: 'Rata-rata Pemain Aktif per Genre' }
+            });
+        });
     </script>
 @endsection

@@ -12,13 +12,15 @@
     </table>
 
     <script>
-        const viral = @json($viral['data']).slice(0, 15);
-        new ApexCharts(document.querySelector("#viralchart"), {
-            chart: { type: 'bar', height: 400 },
-            plotOptions: { bar: { horizontal: true } },
-            series: [{ name: 'Playing/hari', data: viral.map(r => r.playing_per_hari) }],
-            xaxis: { categories: viral.map(r => r.name) },
-            title: { text: 'Top 15 Kecepatan Pertumbuhan Pemain' }
-        }).render();
+        document.addEventListener('DOMContentLoaded', () => {
+            const viral = @json($viral['data']).slice(0, 15);
+            registerChart(document.querySelector("#viralchart"), {
+                chart: { type: 'bar', height: 400 },
+                plotOptions: { bar: { horizontal: true } },
+                series: [{ name: 'Playing/hari', data: viral.map(r => r.playing_per_hari) }],
+                xaxis: { categories: viral.map(r => r.name) },
+                title: { text: 'Top 15 Kecepatan Pertumbuhan Pemain' }
+            });
+        });
     </script>
 @endsection
