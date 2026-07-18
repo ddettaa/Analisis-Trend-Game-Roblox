@@ -21,13 +21,15 @@
         </div>
     </div>
 
-    <div class="fixed inset-x-0 bottom-0 z-40 grid h-16 grid-cols-3 border-t border-border bg-card/95 px-1 pb-[env(safe-area-inset-bottom)] lg:hidden">
-        @foreach ($items as $item)
-            @php($isActive = $item['page'] === $activePage)
-            <a href="{{ $item['href'] }}" data-page="{{ $item['page'] }}" @if ($isActive) aria-current="page" @endif aria-label="{{ $item['label'] }}" class="flex min-h-16 flex-col items-center justify-center gap-1 rounded-md px-2 text-xs font-medium {{ $isActive ? 'text-foreground' : 'text-muted-foreground' }}">
-                <x-dynamic-component :component="'lucide-'.$item['icon']" class="size-4" />
-                <span>{{ $item['label'] }}</span>
-            </a>
-        @endforeach
+    <div data-ui="mobile-dashboard-nav" class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 lg:hidden" style="padding-bottom: env(safe-area-inset-bottom);">
+        <div class="grid h-16 grid-cols-3 px-1">
+            @foreach ($items as $item)
+                @php($isActive = $item['page'] === $activePage)
+                <a href="{{ $item['href'] }}" data-page="{{ $item['page'] }}" @if ($isActive) aria-current="page" @endif aria-label="{{ $item['label'] }}" class="flex min-h-16 flex-col items-center justify-center gap-1 rounded-md px-2 text-xs font-medium {{ $isActive ? 'text-foreground' : 'text-muted-foreground' }}">
+                    <x-dynamic-component :component="'lucide-'.$item['icon']" class="size-4" />
+                    <span>{{ $item['label'] }}</span>
+                </a>
+            @endforeach
+        </div>
     </div>
 </nav>

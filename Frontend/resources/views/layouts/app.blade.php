@@ -20,7 +20,7 @@
 
     <x-analytics.dashboard-nav />
 
-    <main class="space-y-4 px-4 py-6 pb-24 lg:pl-32 lg:pr-8">
+    <main class="space-y-4 px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-10 lg:pl-32 lg:pr-8">
         <x-analytics.status-panel :status="$status" />
 
         @if ($status === 'ok' && $snapshot)

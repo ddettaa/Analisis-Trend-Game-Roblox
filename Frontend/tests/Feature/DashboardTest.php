@@ -25,6 +25,8 @@ class DashboardTest extends TestCase
             ->assertSee('Adventure')
             ->assertSee('ROBLOX.TRENDS')
             ->assertSee('data-ui="dashboard-nav"', false)
+            ->assertSee('data-ui="mobile-dashboard-nav"', false)
+            ->assertSee('padding-bottom: env(safe-area-inset-bottom)', false)
             ->assertSee('data-page="ringkasan"', false)
             ->assertSee('aria-current="page"', false);
     }
