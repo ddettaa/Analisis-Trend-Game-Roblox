@@ -20,8 +20,8 @@
             <x-analytics.metric-card class="min-h-28" label="Emerging" :value="$emergingCount" />
         </div>
 
-        <div aria-label="Legenda status saturasi" class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span class="saas-label mr-1 text-foreground">Status</span>
+        <div role="group" aria-labelledby="saturation-status-legend" class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span id="saturation-status-legend" class="saas-label mr-1 text-foreground">Status</span>
             <x-ui.badge tone="danger">oversaturated</x-ui.badge>
             <x-ui.badge tone="success">emerging</x-ui.badge>
             <x-ui.badge tone="neutral">healthy</x-ui.badge>
@@ -96,6 +96,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             const saturation = @json($saturation['data']);
             const target = document.querySelector('#satchart');
+            const compactCategoryLabel = value => (
+                value.length > 18 ? value.slice(0, 17) + '…' : value
+            );
 
             if (target && saturation.length) {
                 registerChart(target, {
@@ -103,6 +106,19 @@
                     plotOptions: { bar: { borderRadius: 2, columnWidth: '58%' } },
                     series: [{ name: 'Jumlah Game', data: saturation.map(row => ({ x: row.genreL1, y: row.game_count })) }],
                     dataLabels: { enabled: false },
+                    responsive: [{
+                        breakpoint: 640,
+                        options: {
+                            chart: { height: Math.max(320, saturation.length * 36) },
+                            plotOptions: { bar: { horizontal: true, barHeight: '62%' } },
+                            yaxis: {
+                                labels: {
+                                    maxWidth: 120,
+                                    formatter: value => compactCategoryLabel(value),
+                                },
+                            },
+                        },
+                    }],
                 });
             }
         });

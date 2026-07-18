@@ -1,6 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $sortedShares = collect($ranking['share'])->sortDesc();
+        $shareChart = $sortedShares->take(4);
+
+        if ($sortedShares->count() > 4) {
+            $shareChart->put('Other', $sortedShares->skip(4)->sum());
+        }
+
+        $shareChartLabels = $shareChart->keys()->values()->all();
+        $shareChartSeries = $shareChart->values()->all();
+    @endphp
+
     <section data-workspace="ringkasan" class="space-y-5">
         <x-analytics.page-heading
             eyebrow="Market pulse / Live snapshot"
@@ -109,9 +121,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const ranking = @json($ranking['ranking']);
-            const share = @json($ranking['share']);
+            const shareChartLabels = @json($shareChartLabels);
+            const shareChartSeries = @json($shareChartSeries);
             const rankingTarget = document.querySelector('#rankingchart');
             const shareTarget = document.querySelector('#sharechart');
+            const compactCategoryLabel = (value, maxLength) => (
+                value.length > maxLength ? value.slice(0, maxLength - 1) + '…' : value
+            );
 
             if (rankingTarget && ranking.length) {
                 registerChart(rankingTarget, {
@@ -120,16 +136,38 @@
                     series: [{ name: 'Avg Playing', data: ranking.map(row => Math.round(row.avg_playing)) }],
                     xaxis: { categories: ranking.map(row => row.genreL1) },
                     dataLabels: { enabled: false },
+                    responsive: [{
+                        breakpoint: 640,
+                        options: {
+                            chart: { height: Math.max(320, ranking.length * 36) },
+                            plotOptions: { bar: { horizontal: true, barHeight: '62%' } },
+                            xaxis: { categories: ranking.map(row => row.genreL1) },
+                            yaxis: {
+                                labels: {
+                                    maxWidth: 120,
+                                    formatter: value => compactCategoryLabel(value, 18),
+                                },
+                            },
+                        },
+                    }],
                 });
             }
 
-            if (shareTarget && Object.keys(share).length) {
+            if (shareTarget && shareChartLabels.length) {
                 registerChart(shareTarget, {
                     chart: { type: 'donut', height: 320, toolbar: { show: false } },
-                    series: Object.values(share),
-                    labels: Object.keys(share),
+                    series: shareChartSeries,
+                    labels: shareChartLabels,
                     dataLabels: { enabled: false },
                     legend: { position: 'bottom' },
+                    responsive: [{
+                        breakpoint: 640,
+                        options: {
+                            chart: { height: 280 },
+                            legend: { position: 'bottom', fontSize: '11px', itemMargin: { horizontal: 6, vertical: 2 } },
+                            plotOptions: { pie: { donut: { size: '64%' } } },
+                        },
+                    }],
                 });
             }
         });

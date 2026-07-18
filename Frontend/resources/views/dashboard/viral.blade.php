@@ -29,7 +29,7 @@
             <x-ui.card-content class="p-4">
                 @if (count($viral['data']))
                     <div id="viralchart" class="min-w-0" aria-hidden="true"></div>
-                    <div class="sr-only">
+                    <div data-ui="viral-chart-equivalent" class="sr-only">
                         <h3>Data pertumbuhan pemain per hari</h3>
                         <ul>
                             @foreach (array_slice($viral['data'], 0, 15) as $row)
@@ -87,6 +87,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             const viral = @json($viral['data']).slice(0, 15);
             const target = document.querySelector('#viralchart');
+            const compactGameLabel = value => (
+                value.length > 14 ? value.slice(0, 13) + '…' : value
+            );
 
             if (target && viral.length) {
                 registerChart(target, {
@@ -94,7 +97,25 @@
                     plotOptions: { bar: { horizontal: true, borderRadius: 2 } },
                     series: [{ name: 'Playing/hari', data: viral.map(row => row.playing_per_hari) }],
                     xaxis: { categories: viral.map(row => row.name) },
+                    yaxis: {
+                        labels: {
+                            maxWidth: 132,
+                            formatter: value => compactGameLabel(value),
+                        },
+                    },
                     dataLabels: { enabled: false },
+                    responsive: [{
+                        breakpoint: 640,
+                        options: {
+                            chart: { height: Math.max(360, viral.length * 36) },
+                            yaxis: {
+                                labels: {
+                                    maxWidth: 104,
+                                    formatter: value => compactGameLabel(value),
+                                },
+                            },
+                        },
+                    }],
                 });
             }
         });

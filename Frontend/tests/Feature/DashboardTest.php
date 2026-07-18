@@ -63,7 +63,14 @@ class DashboardTest extends TestCase
                     'avg_playing' => 2468,
                     'avg_rating' => 87.4,
                 ]],
-                'share' => ['Adventure' => 100.0],
+                'share' => [
+                    'Adventure' => 30.0,
+                    'Simulation' => 20.0,
+                    'Roleplay' => 16.0,
+                    'Sports' => 14.0,
+                    'Obby' => 12.0,
+                    'Horror' => 8.0,
+                ],
             ], 200),
             '*/api/genre/saturation' => Http::response([
                 'data' => [
@@ -221,6 +228,7 @@ class DashboardTest extends TestCase
         $this->assertSame(2, substr_count($html, 'data-ui="overview-chart-card"'));
         $this->assertSame(1, substr_count($html, 'data-ui="overview-table-card"'));
         $this->assertSame(2, substr_count($html, 'registerChart('));
+        $this->assertSame(2, substr_count($html, 'breakpoint: 640'));
         $this->assertStringNotContainsString('new ApexCharts', $html);
         $this->assertMatchesRegularExpression('/<h2\\b[^>]*>\\s*Rata-rata Pemain Aktif per Genre\\s*<\\/h2>/s', $html);
         $this->assertMatchesRegularExpression('/<h2\\b[^>]*>\\s*Komposisi Genre \\(%\\)\\s*<\\/h2>/s', $html);
@@ -229,6 +237,19 @@ class DashboardTest extends TestCase
         $this->assertMetricCardValue($html, 'Jumlah Genre', '1');
         $this->assertMetricCardValue($html, 'Rating Rata-rata', '87.4');
         $this->assertTableRowValues($html, 'Adventure', ['37', '2468', '87.4']);
+        $this->assertStringContainsString('chart: { height: Math.max(320, ranking.length * 36) }', $html);
+        $this->assertStringContainsString('maxWidth: 120', $html);
+        $this->assertStringContainsString(
+            'const shareChartLabels = ["Adventure","Simulation","Roleplay","Sports","Other"];',
+            $html
+        );
+        $this->assertStringContainsString('const shareChartSeries = [30,20,16,14,20];', $html);
+        $this->assertStringContainsString('<li>Obby: 12%</li>', $html);
+        $this->assertStringContainsString('<li>Horror: 8%</li>', $html);
+        $this->assertStringContainsString(
+            "legend: { position: 'bottom', fontSize: '11px', itemMargin: { horizontal: 6, vertical: 2 } }",
+            $html
+        );
         $this->assertMatchesRegularExpression(
             '/<a\b(?=[^>]*\bdata-page="ringkasan")(?=[^>]*\baria-current="page")[^>]*>/s',
             $html
@@ -259,7 +280,15 @@ class DashboardTest extends TestCase
         $this->assertSame(1, substr_count($html, 'data-ui="saturation-chart-card"'));
         $this->assertSame(1, substr_count($html, 'data-ui="saturation-table-card"'));
         $this->assertSame(1, substr_count($html, 'registerChart('));
+        $this->assertSame(1, substr_count($html, 'breakpoint: 640'));
         $this->assertStringNotContainsString('new ApexCharts', $html);
+        $this->assertStringContainsString('chart: { height: Math.max(320, saturation.length * 36) }', $html);
+        $this->assertStringContainsString('maxWidth: 120', $html);
+        $this->assertMatchesRegularExpression(
+            '/<div\b(?=[^>]*\brole="group")(?=[^>]*\baria-labelledby="saturation-status-legend")[^>]*>'
+                .'.*?<span\b(?=[^>]*\bid="saturation-status-legend")[^>]*>\s*Status\s*<\/span>/s',
+            $html
+        );
         $this->assertMatchesRegularExpression(
             '/<a\b(?=[^>]*\bdata-page="saturasi")(?=[^>]*\baria-current="page")[^>]*>/s',
             $html
@@ -332,13 +361,69 @@ class DashboardTest extends TestCase
 
         $html = $response->getContent();
         $this->assertMatchesRegularExpression('/<h1\b[^>]*>\s*Early momentum\s*<\/h1>/s', $html);
+        $this->assertMatchesRegularExpression(
+            '/<span\b(?=[^>]*\bdata-ui="workspace-context")[^>]*>\s*Early momentum\s*<\/span>/s',
+            $html
+        );
+        $this->assertSame(2, substr_count($html, 'Early momentum'));
+        $this->assertStringNotContainsString('Young momentum', $html);
         $this->assertSame(1, substr_count($html, 'data-ui="viral-chart-card"'));
         $this->assertSame(1, substr_count($html, 'data-ui="viral-table-card"'));
         $this->assertSame(1, substr_count($html, 'registerChart('));
+        $this->assertSame(1, substr_count($html, 'breakpoint: 640'));
+        $this->assertStringContainsString('chart: { height: Math.max(360, viral.length * 36) }', $html);
+        $this->assertStringContainsString('maxWidth: 104', $html);
         $this->assertStringNotContainsString('new ApexCharts', $html);
         $this->assertMatchesRegularExpression(
             '/<a\b(?=[^>]*\bdata-page="viral")(?=[^>]*\baria-current="page")[^>]*>/s',
             $html
+        );
+    }
+
+    public function test_viral_chart_equivalent_is_capped_at_top_fifteen_while_table_keeps_all_rows(): void
+    {
+        $viralRows = array_map(
+            fn (int $index): array => [
+                'name' => sprintf('Momentum signal %02d with a deliberately long game name', $index),
+                'playing' => 1000 + $index,
+                'umur_hari' => $index,
+                'playing_per_hari' => 200 - $index,
+                'genreL1' => 'Genre '.$index,
+            ],
+            range(1, 16)
+        );
+
+        Http::fake([
+            '*/api/snapshot' => Http::response(['snapshot_id' => 1, 'taken_at' => '2026-07-18T10:00:00Z', 'game_count' => 781], 200),
+            '*/api/genre/ranking' => Http::response(['ranking' => [], 'share' => []], 200),
+            '*/api/genre/saturation' => Http::response(['data' => []], 200),
+            '*/api/viral-muda*' => Http::response(['max_umur' => 90, 'data' => $viralRows], 200),
+        ]);
+
+        $html = $this->get('/dashboard/viral')->assertOk()->getContent();
+
+        $this->assertSame(
+            1,
+            preg_match(
+                '/<div\b(?=[^>]*\bdata-ui="viral-chart-equivalent")[^>]*>(.*?)<\/div>/s',
+                $html,
+                $equivalent
+            )
+        );
+
+        $previousPosition = -1;
+        foreach (array_slice($viralRows, 0, 15) as $row) {
+            $position = strpos($equivalent[1], $row['name']);
+            $this->assertNotFalse($position);
+            $this->assertGreaterThan($previousPosition, $position);
+            $previousPosition = $position;
+        }
+
+        $this->assertStringNotContainsString($viralRows[15]['name'], $equivalent[1]);
+        $this->assertTableRowValues(
+            $html,
+            $viralRows[15]['name'],
+            ['1016', '16', '184', 'Genre 16']
         );
     }
 
