@@ -8,12 +8,70 @@ use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
+    private function assertMetricCardValue(string $html, string $label, string $value): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/<div\b(?=[^>]*\bdata-ui="metric-card")[^>]*>.*?<p\b[^>]*>\s*'
+                .preg_quote($label, '/')
+                .'\s*<\/p>.*?<p\b[^>]*>\s*'
+                .preg_quote($value, '/')
+                .'\s*<\/p>/s',
+            $html
+        );
+    }
+
+    /**
+     * @param  list<string>  $expectedCells
+     */
+    private function assertTableRowValues(string $html, string $expectedHeader, array $expectedCells): void
+    {
+        preg_match_all('/<tr\b[^>]*>(.*?)<\/tr>/s', $html, $rows);
+
+        $rowHtml = null;
+        foreach ($rows[1] as $candidate) {
+            if (! preg_match('/<th\b(?=[^>]*\bscope="row")[^>]*>(.*?)<\/th>/s', $candidate, $header)) {
+                continue;
+            }
+
+            $normalizedHeader = trim(html_entity_decode(strip_tags($header[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            if ($normalizedHeader === $expectedHeader) {
+                $rowHtml = $candidate;
+                break;
+            }
+        }
+
+        $this->assertNotNull($rowHtml, 'Missing table row for '.$expectedHeader);
+
+        preg_match_all('/<td\b.*?">(.*?)<\/td>/s', $rowHtml, $cells);
+        $actualCells = array_map(
+            fn (string $cell): string => trim(html_entity_decode(strip_tags($cell), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+            $cells[1]
+        );
+
+        $this->assertSame($expectedCells, $actualCells, 'Unexpected cells for '.$expectedHeader);
+    }
+
     private function fakeAll(): void
     {
         Http::fake([
             '*/api/snapshot' => Http::response(['snapshot_id' => 1, 'taken_at' => '2026-07-18T10:00:00Z', 'game_count' => 781], 200),
-            '*/api/genre/ranking' => Http::response(['ranking' => [['genreL1' => 'Adventure', 'game_count' => 10, 'avg_visits' => 1, 'avg_playing' => 1, 'avg_rating' => 90]], 'share' => ['Adventure' => 100.0]], 200),
-            '*/api/genre/saturation' => Http::response(['data' => [['genreL1' => 'Adventure', 'game_count' => 10, 'avg_playing' => 1, 'status' => 'healthy']]], 200),
+            '*/api/genre/ranking' => Http::response([
+                'ranking' => [[
+                    'genreL1' => 'Adventure',
+                    'game_count' => 37,
+                    'avg_visits' => 345678,
+                    'avg_playing' => 2468,
+                    'avg_rating' => 87.4,
+                ]],
+                'share' => ['Adventure' => 100.0],
+            ], 200),
+            '*/api/genre/saturation' => Http::response([
+                'data' => [
+                    ['genreL1' => 'Builder & Tycoon', 'game_count' => 43, 'avg_playing' => 1250, 'status' => 'oversaturated'],
+                    ['genreL1' => '<Fresh RPG>', 'game_count' => 7, 'avg_playing' => 8765, 'status' => 'emerging'],
+                    ['genreL1' => 'Adventure', 'game_count' => 19, 'avg_playing' => 4321, 'status' => 'healthy'],
+                ],
+            ], 200),
             '*/api/viral-muda*' => Http::response([
                 'max_umur' => 90,
                 'data' => [[
@@ -167,6 +225,14 @@ class DashboardTest extends TestCase
         $this->assertMatchesRegularExpression('/<h2\\b[^>]*>\\s*Rata-rata Pemain Aktif per Genre\\s*<\\/h2>/s', $html);
         $this->assertMatchesRegularExpression('/<h2\\b[^>]*>\\s*Komposisi Genre \\(%\\)\\s*<\\/h2>/s', $html);
         $this->assertMatchesRegularExpression('/<h2\\b[^>]*>\\s*Ranking Genre\\s*<\\/h2>/s', $html);
+        $this->assertMetricCardValue($html, 'Total Game', '781');
+        $this->assertMetricCardValue($html, 'Jumlah Genre', '1');
+        $this->assertMetricCardValue($html, 'Rating Rata-rata', '87.4');
+        $this->assertTableRowValues($html, 'Adventure', ['37', '2468', '87.4']);
+        $this->assertMatchesRegularExpression(
+            '/<a\b(?=[^>]*\bdata-page="ringkasan")(?=[^>]*\baria-current="page")[^>]*>/s',
+            $html
+        );
     }
 
     public function test_saturasi_page_ok(): void
@@ -183,9 +249,9 @@ class DashboardTest extends TestCase
             ->assertSee('data-ui="saturation-chart-card"', false)
             ->assertSee('data-ui="saturation-table-card"', false)
             ->assertSeeInOrder(['Genre terpantau', 'Oversaturated', 'Emerging'])
+            ->assertSee('Builder &amp; Tycoon', false)
+            ->assertSee('&lt;Fresh RPG&gt;', false)
             ->assertSee('Adventure')
-            ->assertSee('10')
-            ->assertSee('healthy')
             ->assertSee('scope="row"', false);
 
         $html = $response->getContent();
@@ -198,6 +264,49 @@ class DashboardTest extends TestCase
             '/<a\b(?=[^>]*\bdata-page="saturasi")(?=[^>]*\baria-current="page")[^>]*>/s',
             $html
         );
+        $this->assertMetricCardValue($html, 'Genre terpantau', '3');
+        $this->assertMetricCardValue($html, 'Oversaturated', '1');
+        $this->assertMetricCardValue($html, 'Emerging', '1');
+        $this->assertTableRowValues($html, 'Builder & Tycoon', ['43', '1250', 'oversaturated']);
+        $this->assertTableRowValues($html, '<Fresh RPG>', ['7', '8765', 'emerging']);
+        $this->assertTableRowValues($html, 'Adventure', ['19', '4321', 'healthy']);
+    }
+
+    public function test_overview_empty_data_preserves_fallbacks_and_skips_chart_mounts(): void
+    {
+        Http::fake([
+            '*/api/snapshot' => Http::response(['snapshot_id' => 1, 'taken_at' => '2026-07-18T10:00:00Z', 'game_count' => 781], 200),
+            '*/api/genre/ranking' => Http::response(['ranking' => [], 'share' => []], 200),
+            '*/api/genre/saturation' => Http::response(['data' => []], 200),
+            '*/api/viral-muda*' => Http::response(['max_umur' => 90, 'data' => []], 200),
+        ]);
+
+        $html = $this->get('/dashboard')->assertOk()->getContent();
+
+        $this->assertSame(2, substr_count($html, 'Belum ada data ranking.'));
+        $this->assertSame(1, substr_count($html, 'Belum ada data komposisi genre.'));
+        $this->assertStringNotContainsString('id="rankingchart"', $html);
+        $this->assertStringNotContainsString('id="sharechart"', $html);
+        $this->assertMetricCardValue($html, 'Jumlah Genre', '0');
+        $this->assertMetricCardValue($html, 'Rating Rata-rata', '—');
+    }
+
+    public function test_saturation_empty_data_preserves_fallbacks_and_skips_chart_mount(): void
+    {
+        Http::fake([
+            '*/api/snapshot' => Http::response(['snapshot_id' => 1, 'taken_at' => '2026-07-18T10:00:00Z', 'game_count' => 781], 200),
+            '*/api/genre/ranking' => Http::response(['ranking' => [], 'share' => []], 200),
+            '*/api/genre/saturation' => Http::response(['data' => []], 200),
+            '*/api/viral-muda*' => Http::response(['max_umur' => 90, 'data' => []], 200),
+        ]);
+
+        $html = $this->get('/dashboard/saturasi')->assertOk()->getContent();
+
+        $this->assertSame(2, substr_count($html, 'Belum ada data saturasi.'));
+        $this->assertStringNotContainsString('id="satchart"', $html);
+        $this->assertMetricCardValue($html, 'Genre terpantau', '0');
+        $this->assertMetricCardValue($html, 'Oversaturated', '0');
+        $this->assertMetricCardValue($html, 'Emerging', '0');
     }
 
     public function test_viral_page_ok(): void
