@@ -1,6 +1,6 @@
 @props(['label', 'value', 'annotation' => null, 'trend' => null])
 
-<div data-ui="metric-card" {{ $attributes->twMerge('saas-panel editorial-card flex min-h-32 flex-col p-4') }}>
+<div data-ui="metric-card" {{ $attributes->except('data-ui')->twMerge('saas-panel editorial-card flex min-h-32 flex-col p-4') }}>
     <p class="saas-label">{{ $label }}</p>
     <div class="mt-4 flex flex-wrap items-baseline justify-between gap-2">
         <p class="font-mono text-3xl font-semibold tabular-nums tracking-[-0.05em] text-foreground">{{ $value }}</p>

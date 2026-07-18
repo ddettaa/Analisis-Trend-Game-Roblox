@@ -7,7 +7,7 @@
     $activePage = request()->is('dashboard/saturasi') ? 'saturasi' : (request()->is('dashboard/viral') ? 'viral' : 'ringkasan');
 @endphp
 
-<nav data-ui="dashboard-nav" aria-label="Navigasi dashboard" {{ $attributes->twMerge('') }}>
+<nav data-ui="dashboard-nav" aria-label="Navigasi dashboard" {{ $attributes->except(['data-ui', 'aria-label'])->twMerge('') }}>
     <div data-ui="icon-rail" class="fixed bottom-0 left-0 top-14 z-30 hidden w-16 flex-col items-center border-r border-border bg-background/95 py-3 backdrop-blur lg:flex">
         <div class="flex w-full flex-col items-center gap-2">
             @foreach ($items as $item)
