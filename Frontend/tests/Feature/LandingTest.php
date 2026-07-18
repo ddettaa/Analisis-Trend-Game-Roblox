@@ -44,17 +44,57 @@ class LandingTest extends TestCase
         $this->assertStringNotContainsString('new ApexCharts', $response->getContent());
     }
 
+    public function test_landing_hides_decorative_icons_from_assistive_technology(): void
+    {
+        Http::fake([
+            '*/api/snapshot' => Http::response(['snapshot_id' => 1, 'taken_at' => '2026-07-18T10:00:00Z', 'game_count' => 781], 200),
+            '*/api/genre/ranking' => Http::response(['ranking' => [['genreL1' => 'Simulation', 'game_count' => 190, 'avg_visits' => 1, 'avg_playing' => 1, 'avg_rating' => 92]], 'share' => ['Simulation' => 100.0]], 200),
+        ]);
+
+        $response = $this->get('/')->assertOk();
+        $document = new \DOMDocument();
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+
+        $this->assertSame(1, $xpath->query('//section[@data-section="hero"]//a[@href="/dashboard"]//*[local-name()="svg" and @aria-hidden="true"]')->length);
+        $this->assertSame(3, $xpath->query('//section[@data-section="features"]//article//*[local-name()="svg" and @aria-hidden="true"]')->length);
+        $this->assertSame(1, $xpath->query('//section[@data-section="final-cta"]//a[@href="/dashboard"]//*[local-name()="svg" and @aria-hidden="true"]')->length);
+    }
+
+    public function test_landing_keeps_mobile_brand_target_accessible(): void
+    {
+        Http::fake([
+            '*/api/snapshot' => Http::response(['snapshot_id' => 1, 'taken_at' => '2026-07-18T10:00:00Z', 'game_count' => 781], 200),
+            '*/api/genre/ranking' => Http::response(['ranking' => [['genreL1' => 'Simulation', 'game_count' => 190, 'avg_visits' => 1, 'avg_playing' => 1, 'avg_rating' => 92]], 'share' => ['Simulation' => 100.0]], 200),
+        ]);
+
+        $response = $this->get('/')->assertOk();
+        $document = new \DOMDocument();
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+
+        $brand = $xpath->query('//header//a[@data-ui="brand-mark"]')->item(0);
+        $this->assertNotNull($brand);
+        $this->assertMatchesRegularExpression('/(?:^|\s)min-h-10(?:\s|$)/', $brand->getAttribute('class'));
+        $this->assertMatchesRegularExpression('/(?:^|\s)min-w-10(?:\s|$)/', $brand->getAttribute('class'));
+    }
+
     public function test_landing_survives_api_down(): void
     {
         Http::fake(function () {
             throw new \Illuminate\Http\Client\ConnectionException('refused');
         });
-        $this->get('/')->assertStatus(200)
+        $response = $this->get('/');
+
+        $response->assertStatus(200)
             ->assertSee('Analisis Trend Roblox')
             ->assertSee('See the market before it moves')
             ->assertSee('Lihat Dashboard')
             ->assertSee('Server analisis tidak aktif.')
             ->assertSee('Jalankan: uvicorn api:app --port 8000 di folder Backend.');
+
+        $this->assertSame(0, substr_count($response->getContent(), 'registerChart('));
+        $this->assertStringNotContainsString('id="minichart"', $response->getContent());
     }
 
     public function test_landing_handles_empty_ranking(): void
@@ -75,6 +115,13 @@ class LandingTest extends TestCase
             'Belum terbaca',
             'Ranking genre belum tersedia untuk snapshot ini.',
         ], false);
+
+        $document = new \DOMDocument();
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+        $this->assertSame(1, $xpath->query('//*[@data-slot="alert" and .//*[@data-slot="alert-title" and normalize-space()="Belum terbaca"]]/*[local-name()="svg" and @aria-hidden="true"]')->length);
+        $this->assertSame(0, substr_count($response->getContent(), 'registerChart('));
+        $this->assertStringNotContainsString('id="minichart"', $response->getContent());
     }
 
     public function test_landing_reports_ranking_endpoint_failure(): void
@@ -87,9 +134,14 @@ class LandingTest extends TestCase
             throw new \Illuminate\Http\Client\ConnectionException('refused');
         });
 
-        $this->get('/')->assertOk()
+        $response = $this->get('/');
+
+        $response->assertOk()
             ->assertSee('See the market before it moves')
             ->assertSee('Lihat Dashboard')
             ->assertSee('Server analisis tidak aktif.');
+
+        $this->assertSame(0, substr_count($response->getContent(), 'registerChart('));
+        $this->assertStringNotContainsString('id="minichart"', $response->getContent());
     }
 }

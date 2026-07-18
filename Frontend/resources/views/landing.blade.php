@@ -28,7 +28,7 @@
 
 <header class="sticky top-0 z-40 h-14 border-b border-border/70 bg-background/85 backdrop-blur-xl">
     <nav aria-label="Navigasi utama" class="saas-container flex h-full items-center justify-between gap-3">
-        <x-analytics.brand-mark class="[&>span:last-child]:hidden sm:[&>span:last-child]:block" />
+        <x-analytics.brand-mark class="min-h-10 min-w-10 justify-center [&>span:last-child]:hidden sm:[&>span:last-child]:block" />
 
         <div class="hidden items-center gap-1 md:flex">
             <a class="inline-flex min-h-10 items-center rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" href="#features">Fitur</a>
@@ -55,7 +55,7 @@
                 <div data-hero-item class="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                     <x-ui.button href="/dashboard" size="lg">
                         Lihat Dashboard
-                        <x-slot:after><x-lucide-arrow-right /></x-slot:after>
+                        <x-slot:after><x-lucide-arrow-right aria-hidden="true" /></x-slot:after>
                     </x-ui.button>
                     <p class="font-mono text-[11px] leading-5 tracking-[0.05em] text-muted-foreground">
                         @if ($status === 'ok' && $snapshot)
@@ -167,7 +167,7 @@
             <div data-reveal class="mt-10 grid gap-4 lg:grid-cols-2">
                 <article class="saas-panel min-h-72 p-6 sm:p-8 lg:row-span-2 lg:min-h-full">
                     <div class="flex size-10 items-center justify-center rounded-lg border border-border bg-muted/40 text-muted-foreground">
-                        <x-lucide-chart-no-axes-column-increasing class="size-5" />
+                        <x-lucide-chart-no-axes-column-increasing aria-hidden="true" class="size-5" />
                     </div>
                     <p class="saas-label mt-8">01 / Composition</p>
                     <h3 class="mt-3 text-xl font-semibold tracking-[-0.025em]">Market composition &amp; ranking</h3>
@@ -184,7 +184,7 @@
                 <article class="saas-panel p-6 sm:p-8">
                     <div class="flex items-start gap-4">
                         <div class="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/40 text-muted-foreground">
-                            <x-lucide-scan-search class="size-5" />
+                            <x-lucide-scan-search aria-hidden="true" class="size-5" />
                         </div>
                         <div>
                             <p class="saas-label">02 / Saturation</p>
@@ -197,7 +197,7 @@
                 <article class="saas-panel p-6 sm:p-8">
                     <div class="flex items-start gap-4">
                         <div class="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/40 text-muted-foreground">
-                            <x-lucide-activity class="size-5" />
+                            <x-lucide-activity aria-hidden="true" class="size-5" />
                         </div>
                         <div>
                             <p class="saas-label">03 / Momentum</p>
@@ -265,7 +265,7 @@
                         </script>
                     @else
                         <x-ui.alert tone="neutral">
-                            <x-lucide-chart-no-axes-column />
+                            <x-lucide-chart-no-axes-column aria-hidden="true" />
                             <x-ui.alert-title>Belum terbaca</x-ui.alert-title>
                             <x-ui.alert-description>Ranking genre belum tersedia untuk snapshot ini.</x-ui.alert-description>
                         </x-ui.alert>
@@ -316,7 +316,7 @@
             </div>
             <x-ui.button href="/dashboard" size="lg" variant="secondary" class="mt-8 lg:mt-0">
                 Buka Dashboard
-                <x-slot:after><x-lucide-arrow-right /></x-slot:after>
+                <x-slot:after><x-lucide-arrow-right aria-hidden="true" /></x-slot:after>
             </x-ui.button>
         </div>
     </section>
