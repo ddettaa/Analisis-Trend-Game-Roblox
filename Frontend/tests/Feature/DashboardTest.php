@@ -20,7 +20,13 @@ class DashboardTest extends TestCase
     public function test_ringkasan_page_ok(): void
     {
         $this->fakeAll();
-        $this->get('/dashboard')->assertStatus(200)->assertsee('Adventure');
+        $this->get('/dashboard')
+            ->assertStatus(200)
+            ->assertSee('Adventure')
+            ->assertSee('ROBLOX.TRENDS')
+            ->assertSee('data-ui="dashboard-nav"', false)
+            ->assertSee('data-page="ringkasan"', false)
+            ->assertSee('aria-current="page"', false);
     }
 
     public function test_saturasi_page_ok(): void
