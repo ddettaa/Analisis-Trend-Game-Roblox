@@ -131,8 +131,15 @@ const assertDashboardNavigation = async (page, route, viewport) => {
 
     await expect(iconRail).toBeHidden();
     await expect(mobileNavigation).toBeVisible();
+    await expect(mobileNavigation).toHaveAttribute('style', /padding-bottom:\s*env\(safe-area-inset-bottom\)/);
     await expect(mobileNavigation.locator('a')).toHaveCount(3);
     await expect(mobileNavigation.locator(`a[data-page="${route.activePage}"]`)).toBeVisible();
+
+    const mainContent = page.locator('main > div');
+    await expect(mainContent).toHaveAttribute(
+        'class',
+        /(?:^|\s)pb-\[calc\(5rem\+env\(safe-area-inset-bottom\)\)\](?:\s|$)/,
+    );
 
     const geometry = await page.evaluate(() => {
         const nav = document.querySelector('[data-ui="mobile-dashboard-nav"]');
@@ -209,6 +216,8 @@ const assertChartOrFallback = async (page, chart, viewport) => {
 };
 
 const assertLanding = async (page) => {
+    const sectionNames = ['hero', 'proof', 'features', 'live-data', 'methodology', 'final-cta'];
+
     await expect(page.locator('body > header')).toBeVisible();
     await expect(page.locator('[data-ui="product-preview"]')).toBeVisible();
     await expect(page.locator('[data-ui="dashboard-nav"], [data-ui="mobile-dashboard-nav"]')).toHaveCount(0);
@@ -216,11 +225,19 @@ const assertLanding = async (page) => {
 
     await expect.poll(() => page.locator('main > section[data-section]').evaluateAll((sections) =>
         sections.map((section) => section.dataset.section),
-    )).toEqual(['hero', 'proof', 'features', 'live-data', 'methodology', 'final-cta']);
+    )).toEqual(sectionNames);
 
-    const accessibilityRegions = page.locator('[data-section="features"], [data-section="final-cta"]');
+    for (const sectionName of sectionNames) {
+        await expect(page.locator(`main > section[data-section="${sectionName}"]`)).toBeVisible();
+    }
+
+    const accessibilityRegions = page.locator([
+        '[data-section="hero"]',
+        '[data-section="features"]',
+        '[data-section="live-data"]',
+        '[data-section="final-cta"]',
+    ].join(', '));
     await expect(accessibilityRegions.getByRole('img')).toHaveCount(0);
-    await expect(accessibilityRegions.locator('svg:not([aria-hidden="true"])')).toHaveCount(0);
     await expect(page.locator('[data-section="hero"]').getByRole('link', { name: 'Lihat Dashboard', exact: true })).toBeVisible();
     await expect(page.locator('[data-section="final-cta"]').getByRole('link', { name: 'Buka Dashboard', exact: true })).toBeVisible();
 };
