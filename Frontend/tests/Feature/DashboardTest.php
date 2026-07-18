@@ -57,6 +57,8 @@ class DashboardTest extends TestCase
                 title="Override title"
                 variant="default"
                 size="xs"
+                href="/override"
+                as="a"
                 x-data="unsafeState"
                 @click="unsafeClick()"
                 class="caller-class"
@@ -64,6 +66,8 @@ class DashboardTest extends TestCase
         BLADE);
 
         $this->assertStringContainsString('data-ui="theme-toggle"', $html);
+        $this->assertMatchesRegularExpression('/^\s*<button\b(?=[^>]*\bdata-ui="theme-toggle")[^>]*>/s', $html);
+        $this->assertSame(1, substr_count($html, 'type="button"'));
         $this->assertStringContainsString('aria-label="Ganti tema warna"', $html);
         $this->assertStringContainsString('title="Ganti tema warna"', $html);
         $this->assertStringContainsString('$store.theme.toggle()', $html);
@@ -73,6 +77,7 @@ class DashboardTest extends TestCase
         $this->assertStringNotContainsString('unsafeClick', $html);
         $this->assertStringNotContainsString('Override theme', $html);
         $this->assertStringNotContainsString('Override title', $html);
+        $this->assertStringNotContainsString('href="/override"', $html);
     }
 
     public function test_component_contract_dashboard_nav_reserves_accessible_name(): void
