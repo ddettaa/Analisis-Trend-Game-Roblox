@@ -1,10 +1,10 @@
-# Desain: Restyle Dashboard dengan Komponen BlatUI
+# Desain: Restyle Dashboard dengan Komponen BlatUI + Landing Page
 
 **Tanggal:** 2026-07-18
-**Status:** Draft untuk review
-**Cakupan:** Melengkapi foundation BlatUI + restyle layout & 3 halaman dashboard dengan komponen BlatUI; ApexCharts pindah dari CDN ke bundle npm & theme-aware
+**Status:** Disetujui (pendekatan C + landing page)
+**Cakupan:** Melengkapi foundation BlatUI + restyle layout & 3 halaman dashboard dengan komponen BlatUI; ApexCharts pindah dari CDN ke bundle npm & theme-aware; **landing page interaktif di `/`** dengan dashboard pindah ke `/dashboard/*`
 **Bergantung pada:** dashboard yang sudah jalan (FastAPI + Laravel, ter-merge ke main)
-**Di luar cakupan:** perubahan endpoint/data/controller-logic; komponen chart BlatUI (opsional, bukan ketergantungan); halaman baru
+**Di luar cakupan:** perubahan endpoint FastAPI; komponen chart BlatUI (opsional, bukan ketergantungan)
 
 ---
 
@@ -44,6 +44,24 @@ Foundation dipasang penuh; komponen BlatUI untuk struktur UI; ApexCharts tetap (
 - **Area konten:** heading halaman, info snapshot sebagai badge (`Snapshot #N · 781 game · tanggal`), banner status pakai komponen alert/callout BlatUI dengan varian: unavailable → destructive (pesan uvicorn), no_data → warning (pesan ingest), error → destructive (pesan cek log). **Teks pesan & logika @if TIDAK berubah** (test assertSee bergantung padanya).
 - Komponen di-`blatui:add` sesuai kebutuhan (mis. button, card, table, badge, alert, separator — daftar final saat implementasi).
 
+### 4b-2. Restrukturisasi route + Landing page (BARU)
+
+**Route:**
+
+| Route lama | Route baru | Halaman |
+|---|---|---|
+| — | `GET /` | **Landing page** (`LandingController@index` atau `DashboardController@landing`) |
+| `GET /` | `GET /dashboard` | Ringkasan |
+| `GET /saturasi` | `GET /dashboard/saturasi` | Saturasi |
+| `GET /viral` | `GET /dashboard/viral` | Viral Muda |
+
+Sidebar dashboard menyesuaikan URL baru; landing punya link "Lihat Dashboard" → `/dashboard`. Test existing di-update mengikuti route baru (bukan dilonggarkan — asersi konten tetap).
+
+**Isi landing (`resources/views/landing.blade.php`, TANPA sidebar — layout sendiri/varian):**
+1. **Hero:** judul besar "Analisis Trend Roblox", tagline singkat, CTA button BlatUI "Lihat Dashboard" → `/dashboard`. Toggle tema tetap tersedia.
+2. **Statistik live:** ambil `snapshot()` + `genreRanking()` via FastApiClient (service existing, tanpa endpoint baru): total game, jumlah genre, genre teratas, waktu snapshot. Angka dianimasikan count-up dengan Alpine saat halaman dimuat — inilah unsur "interaktif". Bila API unavailable/no_data: hero tetap tampil, area statistik menampilkan pesan status ramah (pakai pola banner yang sama) — landing TIDAK boleh error.
+3. **Preview chart mini:** satu bar chart kecil top-5 genre berdasarkan jumlah game (data dari `genreRanking()` yang sama), theme-aware seperti chart lain.
+
 ### 4c. Tiga halaman
 - **Ringkasan:** baris stat card di atas (total game, jumlah genre, avg rating — dihitung dari data yang sudah dikirim controller, tanpa endpoint baru); card "Komposisi Genre" (pie) + card "Rata-rata Pemain per Genre" (bar); tabel ranking pakai komponen table BlatUI.
 - **Saturasi:** card chart bar berwarna status; tabel dengan kolom Status sebagai badge (oversaturated=destructive/merah, emerging=hijau, healthy=abu/secondary).
@@ -57,8 +75,8 @@ Foundation dipasang penuh; komponen BlatUI untuk struktur UI; ApexCharts tetap (
 
 ## 5. Testing & Verifikasi
 
-- **Gerbang regresi:** seluruh 10 test existing (5 DashboardTest, 3 FastApiClientTest, 2 bawaan) harus tetap hijau — `assertSee('Adventure')`, banner uvicorn/no_data/error, dsb. menjamin data & status tetap dirender.
-- Tidak ada test baru wajib (perubahan visual client-side); boleh menambah assertSee ringan bila membantu (mis. label menu sidebar).
+- **Gerbang regresi:** seluruh 10 test existing tetap hijau, dengan DashboardTest **di-update ke route baru** (`/dashboard`, `/dashboard/saturasi`, `/dashboard/viral`) — asersi konten (`assertSee('Adventure')`, banner uvicorn/no_data/error) TIDAK dilonggarkan.
+- **Test baru untuk landing:** `GET /` → 200 + assertSee judul hero; landing saat API unavailable → tetap 200 + hero tampil (tidak crash).
 - **Verifikasi akhir:** dua server + browser — cek sidebar, toggle dark/light, chart mengikuti tema, badge status, ketiga halaman.
 
 ## 6. Risiko yang Diakui
