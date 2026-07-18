@@ -5,7 +5,7 @@
         <x-analytics.page-heading
             eyebrow="Early signals / < 90 days"
             title="Young momentum."
-            description="Temukan game baru dengan pertumbuhan pemain cepat (umur < 90 hari)."
+            description="Game viral muda (umur < 90 hari) diurutkan berdasarkan pertumbuhan pemain per hari."
         />
 
         <div class="grid gap-4 sm:grid-cols-3">

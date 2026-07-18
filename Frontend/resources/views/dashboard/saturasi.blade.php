@@ -5,7 +5,7 @@
         <x-analytics.page-heading
             eyebrow="Supply pressure / Genre map"
             title="Market saturation."
-            description="Lihat kepadatan pasokan tiap genre untuk mengenali ruang tumbuh dan kompetisi pasar."
+            description="Bandingkan jumlah game dan pemain aktif untuk melihat genre yang padat, sehat, atau baru tumbuh."
         />
 
         <div aria-label="Legenda status saturasi" class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">

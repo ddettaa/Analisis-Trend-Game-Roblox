@@ -56,6 +56,7 @@ class DashboardTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('Market saturation.')
+            ->assertSee('Bandingkan jumlah game dan pemain aktif untuk melihat genre yang padat, sehat, atau baru tumbuh.')
             ->assertSee('data-workspace="saturasi"', false)
             ->assertSee('healthy');
 
@@ -73,6 +74,7 @@ class DashboardTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('Young momentum.')
+            ->assertSee('Game viral muda (umur &lt; 90 hari) diurutkan berdasarkan pertumbuhan pemain per hari.', false)
             ->assertSee('data-workspace="viral"', false)
             ->assertSee('umur &lt; 90 hari', false)
             ->assertSee('Belum ada game viral muda.');
