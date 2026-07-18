@@ -1,67 +1,106 @@
 @extends('layouts.app')
+
 @section('content')
-    <h1 class="text-2xl font-bold">Ringkasan Genre</h1>
+    <section data-workspace="ringkasan" class="space-y-8">
+        <x-analytics.page-heading
+            eyebrow="Market pulse / Live snapshot"
+            title="Genre intelligence."
+            description="Pantau komposisi genre Roblox, pemain aktif, dan kualitas untuk membaca peluang pasar dengan lebih jelas."
+        />
 
-    <div class="grid gap-4 sm:grid-cols-3">
-        <x-ui.card variant="sectioned">
-            <x-ui.card-header><x-ui.card-title class="text-sm text-muted-foreground">Total Game</x-ui.card-title></x-ui.card-header>
-            <x-ui.card-content><span class="text-3xl font-bold">{{ $snapshot['game_count'] ?? '—' }}</span></x-ui.card-content>
-        </x-ui.card>
-        <x-ui.card variant="sectioned">
-            <x-ui.card-header><x-ui.card-title class="text-sm text-muted-foreground">Jumlah Genre</x-ui.card-title></x-ui.card-header>
-            <x-ui.card-content><span class="text-3xl font-bold">{{ count($ranking['ranking']) }}</span></x-ui.card-content>
-        </x-ui.card>
-        <x-ui.card variant="sectioned">
-            <x-ui.card-header><x-ui.card-title class="text-sm text-muted-foreground">Rating Rata-rata</x-ui.card-title></x-ui.card-header>
-            <x-ui.card-content><span class="text-3xl font-bold">{{ count($ranking['ranking']) ? round(collect($ranking['ranking'])->avg('avg_rating'), 1) : '—' }}</span></x-ui.card-content>
-        </x-ui.card>
-    </div>
+        <div class="grid gap-4 sm:grid-cols-3">
+            <x-analytics.metric-card label="Total Game" :value="$snapshot['game_count'] ?? '—'" />
+            <x-analytics.metric-card label="Jumlah Genre" :value="count($ranking['ranking'])" />
+            <x-analytics.metric-card label="Rating Rata-rata" :value="count($ranking['ranking']) ? round(collect($ranking['ranking'])->avg('avg_rating'), 1) : '—'" />
+        </div>
 
-    <div class="grid gap-4 lg:grid-cols-2">
-        <x-ui.card variant="sectioned">
-            <x-ui.card-header><x-ui.card-title>Komposisi Genre (%)</x-ui.card-title></x-ui.card-header>
-            <x-ui.card-content><div id="sharechart"></div></x-ui.card-content>
-        </x-ui.card>
-        <x-ui.card variant="sectioned">
-            <x-ui.card-header><x-ui.card-title>Rata-rata Pemain Aktif per Genre</x-ui.card-title></x-ui.card-header>
-            <x-ui.card-content><div id="rankingchart"></div></x-ui.card-content>
-        </x-ui.card>
-    </div>
+        <div class="grid gap-6 xl:grid-cols-2">
+            <x-ui.card variant="sectioned">
+                <x-ui.card-header>
+                    <p class="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Demand / Active players</p>
+                    <x-ui.card-title as="h2">Rata-rata Pemain Aktif per Genre</x-ui.card-title>
+                </x-ui.card-header>
+                <x-ui.card-content>
+                    <div id="rankingchart" aria-hidden="true"></div>
+                    <div class="sr-only">
+                        <h3>Data rata-rata pemain aktif per genre</h3>
+                        <ul>
+                            @foreach ($ranking['ranking'] as $row)
+                                <li>{{ $row['genreL1'] }}: {{ round($row['avg_playing']) }} pemain aktif rata-rata</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </x-ui.card-content>
+            </x-ui.card>
 
-    <x-ui.card variant="sectioned">
-        <x-ui.card-header><x-ui.card-title>Ranking Genre</x-ui.card-title></x-ui.card-header>
-        <x-ui.card-content>
-            <table class="w-full text-sm">
-                <thead class="border-b border-border text-left text-muted-foreground">
-                    <tr><th class="py-2">Genre</th><th>Game</th><th>Avg Playing</th><th>Avg Rating</th></tr>
-                </thead>
-                <tbody>
-                @foreach ($ranking['ranking'] as $row)
-                    <tr class="border-b border-border/50">
-                        <td class="py-2 font-medium">{{ $row['genreL1'] }}</td>
-                        <td>{{ $row['game_count'] }}</td>
-                        <td>{{ round($row['avg_playing']) }}</td>
-                        <td>{{ round($row['avg_rating'], 1) }}</td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </x-ui.card-content>
-    </x-ui.card>
+            <x-ui.card variant="sectioned">
+                <x-ui.card-header>
+                    <p class="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Supply / Share</p>
+                    <x-ui.card-title as="h2">Komposisi Genre (%)</x-ui.card-title>
+                </x-ui.card-header>
+                <x-ui.card-content>
+                    <div id="sharechart" aria-hidden="true"></div>
+                    <div class="sr-only">
+                        <h3>Data komposisi genre</h3>
+                        <ul>
+                            @foreach ($ranking['share'] as $genre => $share)
+                                <li>{{ $genre }}: {{ $share }}%</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </x-ui.card-content>
+            </x-ui.card>
+        </div>
+
+        <x-ui.card variant="sectioned">
+            <x-ui.card-header>
+                <p class="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Market leaderboard</p>
+                <x-ui.card-title as="h2">Ranking Genre</x-ui.card-title>
+            </x-ui.card-header>
+            <x-ui.card-content>
+                <x-ui.table>
+                    <x-ui.table-header>
+                        <x-ui.table-row>
+                            <x-ui.table-head>Genre</x-ui.table-head>
+                            <x-ui.table-head>Game</x-ui.table-head>
+                            <x-ui.table-head>Avg Playing</x-ui.table-head>
+                            <x-ui.table-head>Avg Rating</x-ui.table-head>
+                        </x-ui.table-row>
+                    </x-ui.table-header>
+                    <x-ui.table-body>
+                        @foreach ($ranking['ranking'] as $row)
+                            <x-ui.table-row>
+                                <x-ui.table-cell class="font-medium">{{ $row['genreL1'] }}</x-ui.table-cell>
+                                <x-ui.table-cell>{{ $row['game_count'] }}</x-ui.table-cell>
+                                <x-ui.table-cell>{{ round($row['avg_playing']) }}</x-ui.table-cell>
+                                <x-ui.table-cell>{{ round($row['avg_rating'], 1) }}</x-ui.table-cell>
+                            </x-ui.table-row>
+                        @endforeach
+                    </x-ui.table-body>
+                </x-ui.table>
+            </x-ui.card-content>
+        </x-ui.card>
+    </section>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const share = @json($ranking['share']);
             const ranking = @json($ranking['ranking']);
+            const share = @json($ranking['share']);
+
+            registerChart(document.querySelector('#rankingchart'), {
+                chart: { type: 'bar', height: 340, toolbar: { show: false } },
+                plotOptions: { bar: { borderRadius: 2, columnWidth: '58%' } },
+                series: [{ name: 'Avg Playing', data: ranking.map(row => Math.round(row.avg_playing)) }],
+                xaxis: { categories: ranking.map(row => row.genreL1) },
+                dataLabels: { enabled: false },
+            });
+
             registerChart(document.querySelector('#sharechart'), {
-                chart: { type: 'pie', height: 320 },
+                chart: { type: 'donut', height: 340, toolbar: { show: false } },
                 series: Object.values(share),
                 labels: Object.keys(share),
-            });
-            registerChart(document.querySelector('#rankingchart'), {
-                chart: { type: 'bar', height: 320 },
-                series: [{ name: 'Avg Playing', data: ranking.map(r => Math.round(r.avg_playing)) }],
-                xaxis: { categories: ranking.map(r => r.genreL1) },
+                dataLabels: { enabled: false },
+                legend: { position: 'bottom' },
             });
         });
     </script>
