@@ -47,3 +47,16 @@ def test_negative_age_dropped():
     clean, report = clean_games(df)
     assert len(clean) == 0
     assert report["dropped_negative_age"] == 1
+
+
+def test_invalid_date_dropped():
+    df = pd.DataFrame([_row(updated="")])  # empty updated -> NaT
+    clean, report = clean_games(df)
+    assert len(clean) == 0
+    assert report["dropped_invalid_date"] == 1
+
+
+def test_umur_hari_is_int_dtype():
+    df = pd.DataFrame([_row(), _row(uid="2")])
+    clean, _ = clean_games(df)
+    assert clean["umur_hari"].dtype.kind == "i"  # integer

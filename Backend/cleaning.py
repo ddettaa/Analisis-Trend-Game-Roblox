@@ -3,7 +3,12 @@ import pandas as pd
 
 def clean_games(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     df = df.copy()
-    report = {"dropped_duplicates": 0, "dropped_negative_age": 0, "filled_genre": 0}
+    report = {
+        "dropped_duplicates": 0,
+        "dropped_negative_age": 0,
+        "filled_genre": 0,
+        "dropped_invalid_date": 0,
+    }
 
     # genreL1 kosong -> Unknown
     empty_genre = df["genreL1"].isna() | (df["genreL1"].astype(str).str.strip() == "")
@@ -19,6 +24,12 @@ def clean_games(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     df = df.drop_duplicates(subset="uid")
     report["dropped_duplicates"] = before - len(df)
 
+    # buang baris dengan created/updated yang gagal diparse (NaT)
+    before = len(df)
+    invalid_date = df["created"].isna() | df["updated"].isna()
+    df = df[~invalid_date]
+    report["dropped_invalid_date"] = before - len(df)
+
     # rating
     total_votes = df["totalUpVotes"].fillna(0) + df["totalDownVotes"].fillna(0)
     df["rating"] = (df["totalUpVotes"].fillna(0) / total_votes * 100).round(2)
@@ -29,6 +40,9 @@ def clean_games(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     before = len(df)
     df = df[~(df["umur_hari"] < 0)]
     report["dropped_negative_age"] = before - len(df)
+
+    # umur_hari aman di-cast ke int setelah baris NaT & negatif dibuang
+    df["umur_hari"] = df["umur_hari"].astype(int)
 
     # playing_per_hari (hindari bagi nol -> 0)
     df["playing_per_hari"] = (
