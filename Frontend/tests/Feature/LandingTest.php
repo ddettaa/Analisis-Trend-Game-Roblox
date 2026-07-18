@@ -30,6 +30,7 @@ class LandingTest extends TestCase
             ->assertSee('Simulation');
 
         $response->assertSeeInOrder([
+            'data-section="hero"',
             'data-ui="product-preview"',
             'data-section="proof"',
             'data-section="features"',
