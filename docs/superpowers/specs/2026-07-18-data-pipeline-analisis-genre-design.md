@@ -102,9 +102,10 @@ Langkah:
 3. **Cleaning** (dari temuan notebook):
    - `created`, `updated` → datetime (`errors="coerce"`).
    - `genreL1` kosong → `"Unknown"` (ada 30 di data awal).
+   - Buang & laporkan baris dengan tanggal rusak/kosong (NaT pada `created`/`updated`) — key `dropped_invalid_date`. (Data awal punya 1 baris `updated` kosong.)
    - Hitung `rating`.
    - Buang duplikat `uid`.
-   - Buang/laporkan baris dengan `umur_hari` negatif (data rusak: `updated` < `created`).
+   - Buang/laporkan baris dengan `umur_hari` negatif (data rusak: `updated` < `created`), lalu cast `umur_hari` ke int.
 4. Buat baris baru di `snapshots` (`taken_at` = sekarang).
 5. Simpan semua game ke `games_snapshot` dengan `snapshot_id` tsb.
 6. Cetak ringkasan: jumlah game, genre teratas, berapa yang di-skip & alasannya.
