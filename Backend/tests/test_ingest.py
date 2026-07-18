@@ -53,3 +53,17 @@ def test_ingest_csv_empty_raises(conn, tmp_path):
     p.write_text("uid,name,visits,playing,likes,genre,genreL1,created,updated,description,creator,playerCount,totalUpVotes,totalDownVotes\n")
     with pytest.raises(ValueError):
         ingest_csv(conn, str(p))
+
+
+import os
+
+
+def test_real_csv_ingest_and_analyze(conn):
+    csv = os.path.join(os.path.dirname(__file__), "..", "..", "Dataset", "Dataset.csv")
+    if not os.path.exists(csv):
+        import pytest
+        pytest.skip("Dataset.csv tidak ditemukan")
+    init_schema(conn)
+    report = ingest_csv(conn, csv)
+    assert report["saved_rows"] > 500        # ~782 dikurangi baris rusak
+    assert report["snapshot_id"] == 1
