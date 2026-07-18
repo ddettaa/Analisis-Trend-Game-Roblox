@@ -1,34 +1,48 @@
 import ApexCharts from 'apexcharts';
-// BlatUI engine (published via `vendor:publish --tag=blatui-foundations`) — imports Alpine,
-// registers BlatUI's plugins/store/components, and calls Alpine.start() itself.
-// NOTE: do NOT also import/start Alpine manually here — blatui.js already does this
-// (see resources/js/blatui.js), so a duplicate Alpine.plugin()/Alpine.start() call here
-// would double-register the anchor/collapse/focus plugins.
 import './blatui';
 
 window.ApexCharts = ApexCharts;
 
-// ── Tema: BlatUI's Alpine store ($store.theme, localStorage key `theme:mode`) is the
-// single source of truth for dark mode — see blatui-core.js. Do NOT bootstrap dark
-// mode here too; that would create two conflicting authorities toggling the `dark`
-// class. This file only reacts to the class (via the MutationObserver below).
-
-// ── Chart registry theme-aware ──
 const isDark = () => document.documentElement.classList.contains('dark');
-const chartTheme = () => ({ mode: isDark() ? 'dark' : 'light', foreColor: isDark() ? '#a1a1aa' : '#52525b' });
+const cssToken = (name, fallback) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+const chartTheme = () => ({
+    mode: isDark() ? 'dark' : 'light',
+    foreColor: cssToken('--muted-foreground', '#52525b'),
+    primary: cssToken('--chart-1', '#2563eb'),
+    border: cssToken('--border', '#e4e4e7'),
+});
+
 window._charts = [];
 window.registerChart = (el, options) => {
-    const t = chartTheme();
-    const c = new ApexCharts(el, {
+    if (!el) return null;
+
+    const theme = chartTheme();
+    const chart = new ApexCharts(el, {
         ...options,
-        theme: { mode: t.mode },
-        chart: { ...(options.chart || {}), background: 'transparent', foreColor: t.foreColor },
+        colors: options.colors || [theme.primary],
+        theme: { ...(options.theme || {}), mode: theme.mode },
+        chart: {
+            ...(options.chart || {}),
+            background: 'transparent',
+            foreColor: theme.foreColor,
+            fontFamily: 'inherit',
+        },
+        grid: { ...(options.grid || {}), borderColor: theme.border },
     });
-    c.render();
-    window._charts.push(c);
-    return c;
+
+    chart.render();
+    window._charts.push(chart);
+    return chart;
 };
+
 new MutationObserver(() => {
-    const t = chartTheme();
-    window._charts.forEach(c => c.updateOptions({ theme: { mode: t.mode }, chart: { foreColor: t.foreColor } }));
+    const theme = chartTheme();
+    window._charts.forEach(chart =>
+        chart.updateOptions({
+            colors: [theme.primary],
+            theme: { mode: theme.mode },
+            chart: { foreColor: theme.foreColor },
+            grid: { borderColor: theme.border },
+        }),
+    );
 }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
