@@ -23,7 +23,7 @@ export const initLandingExperience = () => {
 
     const heroAnimation = animate(
         '[data-hero-item]',
-        { opacity: [0, 1], y: [16, 0] },
+        { opacity: [0, 1], y: [18, 0] },
         { duration: 0.55, delay: stagger(0.08), ease: 'ease-out' },
     );
     const revealObservers = [...document.querySelectorAll('[data-reveal]')].map((element) => inView(element, () => {
@@ -34,7 +34,7 @@ export const initLandingExperience = () => {
         );
 
         return () => reveal.stop();
-    }));
+    }, { margin: '-10% 0px' }));
 
     return () => {
         cancelAnimationFrame(frameId);
