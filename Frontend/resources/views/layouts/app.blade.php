@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Analisis Trend Roblox</title>
+    <script>
+        try { const m = localStorage.getItem('theme:mode'); if (m === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-background text-foreground antialiased">
