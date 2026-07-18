@@ -51,13 +51,36 @@ class DashboardTest extends TestCase
     public function test_saturasi_page_ok(): void
     {
         $this->fakeAll();
-        $this->get('/dashboard/saturasi')->assertStatus(200);
+        $response = $this->get('/dashboard/saturasi');
+
+        $response
+            ->assertOk()
+            ->assertSee('Market saturation.')
+            ->assertSee('data-workspace="saturasi"', false)
+            ->assertSee('healthy');
+
+        $this->assertMatchesRegularExpression(
+            '/<a\b(?=[^>]*\bdata-page="saturasi")(?=[^>]*\baria-current="page")[^>]*>/s',
+            $response->getContent()
+        );
     }
 
     public function test_viral_page_ok(): void
     {
         $this->fakeAll();
-        $this->get('/dashboard/viral')->assertStatus(200);
+        $response = $this->get('/dashboard/viral');
+
+        $response
+            ->assertOk()
+            ->assertSee('Young momentum.')
+            ->assertSee('data-workspace="viral"', false)
+            ->assertSee('umur &lt; 90 hari', false)
+            ->assertSee('Belum ada game viral muda.');
+
+        $this->assertMatchesRegularExpression(
+            '/<a\b(?=[^>]*\bdata-page="viral")(?=[^>]*\baria-current="page")[^>]*>/s',
+            $response->getContent()
+        );
     }
 
     public function test_shows_banner_when_unavailable(): void

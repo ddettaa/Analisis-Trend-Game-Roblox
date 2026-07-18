@@ -1,43 +1,84 @@
 @extends('layouts.app')
+
 @section('content')
-    <h1 class="text-2xl font-bold">Game Viral Muda <span class="text-base font-normal text-muted-foreground">(umur &lt; 90 hari)</span></h1>
+    <section data-workspace="viral" class="space-y-8">
+        <x-analytics.page-heading
+            eyebrow="Early signals / < 90 days"
+            title="Young momentum."
+            description="Temukan game baru dengan pertumbuhan pemain cepat (umur < 90 hari)."
+        />
 
-    <x-ui.card variant="sectioned">
-        <x-ui.card-header><x-ui.card-title>Top 15 Kecepatan Pertumbuhan Pemain</x-ui.card-title></x-ui.card-header>
-        <x-ui.card-content><div id="viralchart"></div></x-ui.card-content>
-    </x-ui.card>
+        <div class="grid gap-4 sm:grid-cols-3">
+            <x-analytics.metric-card
+                label="Game terdeteksi"
+                :value="count($viral['data'])"
+                :annotation="'Window max '.($viral['max_umur'] ?? 90).' hari'"
+            />
+        </div>
 
-    <x-ui.card variant="sectioned">
-        <x-ui.card-header><x-ui.card-title>Daftar Game</x-ui.card-title></x-ui.card-header>
-        <x-ui.card-content>
-            <table class="w-full text-sm">
-                <thead class="border-b border-border text-left text-muted-foreground">
-                    <tr><th class="py-2">Nama</th><th>Playing</th><th>Umur (hari)</th><th>Playing/hari</th><th>Genre</th></tr>
-                </thead>
-                <tbody>
-                @foreach ($viral['data'] as $row)
-                    <tr class="border-b border-border/50">
-                        <td class="py-2 font-medium">{{ $row['name'] }}</td>
-                        <td>{{ $row['playing'] }}</td>
-                        <td>{{ $row['umur_hari'] }}</td>
-                        <td>{{ $row['playing_per_hari'] }}</td>
-                        <td>{{ $row['genreL1'] }}</td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </x-ui.card-content>
-    </x-ui.card>
+        <x-ui.card variant="sectioned" class="editorial-card" data-ui="viral-chart-card">
+            <x-ui.card-header>
+                <p class="editorial-eyebrow">Velocity / Top 15</p>
+                <h2 class="leading-none font-semibold">Kecepatan Pertumbuhan Pemain</h2>
+            </x-ui.card-header>
+            <x-ui.card-content>
+                @if (count($viral['data']))
+                    <div id="viralchart" aria-hidden="true"></div>
+                @else
+                    <p class="text-sm text-muted-foreground">Belum ada game viral muda.</p>
+                @endif
+            </x-ui.card-content>
+        </x-ui.card>
+
+        <x-ui.card variant="sectioned" class="editorial-card" data-ui="viral-table-card">
+            <x-ui.card-header>
+                <p class="editorial-eyebrow">Early signals / Game list</p>
+                <h2 id="viral-table-title" class="leading-none font-semibold">Daftar Game</h2>
+            </x-ui.card-header>
+            <x-ui.card-content>
+                <x-ui.table aria-labelledby="viral-table-title">
+                    <x-ui.table-header>
+                        <x-ui.table-row>
+                            <x-ui.table-head>Nama</x-ui.table-head>
+                            <x-ui.table-head>Playing</x-ui.table-head>
+                            <x-ui.table-head>Umur (hari)</x-ui.table-head>
+                            <x-ui.table-head>Playing/hari</x-ui.table-head>
+                            <x-ui.table-head>Genre</x-ui.table-head>
+                        </x-ui.table-row>
+                    </x-ui.table-header>
+                    <x-ui.table-body>
+                        @forelse ($viral['data'] as $row)
+                            <x-ui.table-row>
+                                <th scope="row" class="p-2 align-middle whitespace-nowrap font-medium">{{ $row['name'] }}</th>
+                                <x-ui.table-cell>{{ $row['playing'] }}</x-ui.table-cell>
+                                <x-ui.table-cell>{{ $row['umur_hari'] }}</x-ui.table-cell>
+                                <x-ui.table-cell>{{ $row['playing_per_hari'] }}</x-ui.table-cell>
+                                <x-ui.table-cell>{{ $row['genreL1'] }}</x-ui.table-cell>
+                            </x-ui.table-row>
+                        @empty
+                            <x-ui.table-row>
+                                <x-ui.table-cell colspan="5" class="py-6 text-center text-muted-foreground">Belum ada game viral muda.</x-ui.table-cell>
+                            </x-ui.table-row>
+                        @endforelse
+                    </x-ui.table-body>
+                </x-ui.table>
+            </x-ui.card-content>
+        </x-ui.card>
+    </section>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const viral = @json($viral['data']).slice(0, 15);
-            registerChart(document.querySelector('#viralchart'), {
-                chart: { type: 'bar', height: 400 },
-                plotOptions: { bar: { horizontal: true } },
-                series: [{ name: 'Playing/hari', data: viral.map(r => r.playing_per_hari) }],
-                xaxis: { categories: viral.map(r => r.name) },
-            });
+
+            if (viral.length) {
+                registerChart(document.querySelector('#viralchart'), {
+                    chart: { type: 'bar', height: 420, toolbar: { show: false } },
+                    plotOptions: { bar: { horizontal: true, borderRadius: 2 } },
+                    series: [{ name: 'Playing/hari', data: viral.map(row => row.playing_per_hari) }],
+                    xaxis: { categories: viral.map(row => row.name) },
+                    dataLabels: { enabled: false },
+                });
+            }
         });
     </script>
 @endsection
