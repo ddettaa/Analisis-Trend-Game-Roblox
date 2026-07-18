@@ -34,7 +34,7 @@
 <main>
     <section class="relative isolate flex min-h-[calc(100vh-3.5rem)] items-center overflow-hidden px-4 py-16 sm:px-6 lg:px-8">
         <div class="pointer-events-none absolute inset-0 -z-10 opacity-30" aria-hidden="true">
-            <x-analytics.ascii-field data-ui="ascii-field" />
+            <x-analytics.ascii-field />
         </div>
         <div class="mx-auto w-full max-w-7xl">
             <div class="max-w-4xl">
@@ -55,7 +55,7 @@
 
     <section class="bg-primary px-4 py-5 text-primary-foreground sm:px-6 lg:px-8">
         <div class="mx-auto flex max-w-7xl items-center gap-4 font-mono text-sm sm:text-base">
-            <x-analytics.ascii-field data-ui="ascii-field" class="hidden shrink-0 sm:block" />
+            <x-analytics.ascii-field class="hidden shrink-0 sm:block" />
             <p class="font-semibold tracking-tight">
                 @if ($snapshot)
                     {{ number_format((int) $snapshot['game_count'], 0, ',', '.') }} games. One market signal.

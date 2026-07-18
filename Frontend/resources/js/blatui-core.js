@@ -7,6 +7,54 @@ import { computePosition, autoUpdate, flip, shift, offset as flOffset, size } fr
 // Theme store — dark mode + color preset + radius, persisted to localStorage.
 // Mirrors the data-attributes that resources/css/app.css keys off of.
 // ---------------------------------------------------------------------------
+const safeStorage = {
+    get(key, fallback = null) {
+        try {
+            const storage = typeof window !== 'undefined' ? window.localStorage : globalThis.localStorage;
+            return storage?.getItem(key) || fallback;
+        } catch {
+            return fallback;
+        }
+    },
+    set(key, value) {
+        try {
+            const storage = typeof window !== 'undefined' ? window.localStorage : globalThis.localStorage;
+            storage?.setItem(key, value);
+        } catch {
+            // Storage can be disabled by privacy settings or embedded contexts.
+        }
+    },
+    remove(key) {
+        try {
+            const storage = typeof window !== 'undefined' ? window.localStorage : globalThis.localStorage;
+            storage?.removeItem(key);
+        } catch {
+            // Storage can be disabled by privacy settings or embedded contexts.
+        }
+    },
+};
+
+const prefersDark = () => {
+    try {
+        return typeof window !== 'undefined'
+            && typeof window.matchMedia === 'function'
+            && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch {
+        return false;
+    }
+};
+
+const watchPrefersDark = (listener) => {
+    try {
+        if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+        if (typeof media.addEventListener === 'function') media.addEventListener('change', listener);
+        else if (typeof media.addListener === 'function') media.addListener(listener);
+    } catch {
+        // Media preferences can be unavailable in embedded or server-rendered contexts.
+    }
+};
+
 const themeStore = {
     // Dark-mode policy — set via registerBlatUI(Alpine, { darkMode }).
     //   'class'  (default) light until an explicit toggle; NEVER auto-applies the OS
@@ -15,25 +63,25 @@ const themeStore = {
     //   false    hard light-only (dark disabled, toggle is a no-op).
     darkMode: 'class',
     // Every dimension shadcn exposes, each persisted independently.
-    mode: localStorage.getItem('theme:mode') || 'light',
-    base: localStorage.getItem('theme:base') || 'neutral',
-    preset: localStorage.getItem('theme:preset') || 'default',
-    radius: localStorage.getItem('theme:radius') || '0.625',
-    font: localStorage.getItem('theme:font') || 'sans',
-    shadow: localStorage.getItem('theme:shadow') || 'default',
-    spacing: localStorage.getItem('theme:spacing') || 'default',
-    tracking: localStorage.getItem('theme:tracking') || 'normal',
-    inputStyle: localStorage.getItem('theme:inputStyle') || 'outline',
-    fontHeading: localStorage.getItem('theme:fontHeading') || 'sans',
+    mode: safeStorage.get('theme:mode', 'light'),
+    base: safeStorage.get('theme:base', 'neutral'),
+    preset: safeStorage.get('theme:preset', 'default'),
+    radius: safeStorage.get('theme:radius', '0.625'),
+    font: safeStorage.get('theme:font', 'sans'),
+    shadow: safeStorage.get('theme:shadow', 'default'),
+    spacing: safeStorage.get('theme:spacing', 'default'),
+    tracking: safeStorage.get('theme:tracking', 'normal'),
+    inputStyle: safeStorage.get('theme:inputStyle', 'outline'),
+    fontHeading: safeStorage.get('theme:fontHeading', 'sans'),
 
     init() {
         // No stored choice → fall back per the darkMode policy: 'system' follows the OS,
         // anything else stays light (dark only after an explicit toggle).
-        if (!localStorage.getItem('theme:mode')) {
+        if (!safeStorage.get('theme:mode')) {
             this.mode = this.darkMode === 'system' ? 'system' : 'light';
         }
         this.apply();
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        watchPrefersDark(() => {
             if (this.mode === 'system') this.apply();
         });
         // Keep every same-origin document in sync (e.g. block-preview iframes):
@@ -51,12 +99,12 @@ const themeStore = {
 
     get isDark() {
         if (this.darkMode === false) return false;
-        return this.mode === 'dark' || (this.mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        return this.mode === 'dark' || (this.mode === 'system' && prefersDark());
     },
 
     set(key, value) {
         this[key] = value;
-        localStorage.setItem('theme:' + key, value);
+        safeStorage.set('theme:' + key, value);
         this.apply();
     },
 
@@ -97,14 +145,14 @@ const themeStore = {
         };
         Object.entries(next).forEach(([k, v]) => {
             this[k] = v;
-            localStorage.setItem('theme:' + k, v);
+            safeStorage.set('theme:' + k, v);
         });
         this.apply();
     },
 
     reset() {
         ['mode', 'base', 'preset', 'radius', 'font', 'shadow', 'spacing', 'tracking', 'inputStyle', 'fontHeading'].forEach((k) =>
-            localStorage.removeItem('theme:' + k),
+            safeStorage.remove('theme:' + k),
         );
         this.mode = this.darkMode === 'system' ? 'system' : 'light';
         this.base = 'neutral';

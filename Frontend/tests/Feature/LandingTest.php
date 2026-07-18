@@ -28,6 +28,7 @@ class LandingTest extends TestCase
             ->assertSee('Simulation');
 
         $this->assertSame(1, substr_count($response->getContent(), 'href="/"'));
+        $this->assertSame(2, substr_count($response->getContent(), 'data-ui="ascii-field"'));
     }
 
     public function test_landing_survives_api_down(): void
