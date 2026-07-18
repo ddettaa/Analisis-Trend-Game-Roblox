@@ -6,6 +6,15 @@ use App\Services\FastApiClient;
 
 class DashboardController extends Controller
 {
+    public function landing(FastApiClient $api)
+    {
+        $snapshot = $api->snapshot();
+        $ranking = $api->genreRanking();
+        return view('landing', [
+            'snapshot' => $snapshot, 'status' => $api->status(), 'ranking' => $ranking,
+        ]);
+    }
+
     public function ringkasan(FastApiClient $api)
     {
         $snapshot = $api->snapshot();
