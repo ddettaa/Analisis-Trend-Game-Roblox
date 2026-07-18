@@ -19,16 +19,28 @@ class LandingTest extends TestCase
             ->assertSee('Analisis Trend Roblox')
             ->assertSee('Lihat Dashboard')
             ->assertSee('781')
-            ->assertSee('Decode what Roblox plays.')
+            ->assertSee('See the market before it moves')
             ->assertSee('data-page="landing"', false)
-            ->assertSee('data-ui="ascii-field"', false)
-            ->assertSee('sm:block', false)
+            ->assertSee('data-ui="product-preview"', false)
+            ->assertSee('data-section="proof"', false)
+            ->assertSee('data-section="features"', false)
+            ->assertSee('data-section="methodology"', false)
             ->assertSee('data-ui="genre-ranking-list"', false)
             ->assertSee('try {', false)
             ->assertSee('Simulation');
 
+        $response->assertSeeInOrder([
+            'data-ui="product-preview"',
+            'data-section="proof"',
+            'data-section="features"',
+            'data-section="live-data"',
+            'data-section="methodology"',
+            'data-section="final-cta"',
+        ], false);
+
         $this->assertSame(1, substr_count($response->getContent(), 'href="/"'));
-        $this->assertSame(2, substr_count($response->getContent(), 'data-ui="ascii-field"'));
+        $this->assertSame(1, substr_count($response->getContent(), 'registerChart('));
+        $this->assertStringNotContainsString('new ApexCharts', $response->getContent());
     }
 
     public function test_landing_survives_api_down(): void
@@ -38,7 +50,10 @@ class LandingTest extends TestCase
         });
         $this->get('/')->assertStatus(200)
             ->assertSee('Analisis Trend Roblox')
-            ->assertSee('Lihat Dashboard');
+            ->assertSee('See the market before it moves')
+            ->assertSee('Lihat Dashboard')
+            ->assertSee('Server analisis tidak aktif.')
+            ->assertSee('Jalankan: uvicorn api:app --port 8000 di folder Backend.');
     }
 
     public function test_landing_handles_empty_ranking(): void
@@ -51,13 +66,13 @@ class LandingTest extends TestCase
         $response = $this->get('/');
 
         $response->assertOk()
-            ->assertSee('Decode what Roblox plays.')
+            ->assertSee('See the market before it moves')
             ->assertSee('Belum terbaca');
 
         $response->assertSeeInOrder([
             'data-slot="alert-title"',
             'Belum terbaca',
-            'Ranking genre belum tersedia',
+            'Ranking genre belum tersedia untuk snapshot ini.',
         ], false);
     }
 
@@ -72,7 +87,7 @@ class LandingTest extends TestCase
         });
 
         $this->get('/')->assertOk()
-            ->assertSee('Decode what Roblox plays.')
+            ->assertSee('See the market before it moves')
             ->assertSee('Lihat Dashboard')
             ->assertSee('Server analisis tidak aktif.');
     }
