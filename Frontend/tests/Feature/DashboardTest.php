@@ -46,7 +46,10 @@ class DashboardTest extends TestCase
         Http::fake(function () {
             throw new \Illuminate\Http\Client\ConnectionException('refused');
         });
-        $this->get('/dashboard')->assertStatus(200)->assertSee('uvicorn');
+        $this->get('/dashboard')
+            ->assertStatus(200)
+            ->assertSee('uvicorn')
+            ->assertSee('Server analisis tidak aktif.');
     }
 
     public function test_shows_banner_when_error(): void
@@ -57,6 +60,6 @@ class DashboardTest extends TestCase
             '*/api/genre/saturation' => Http::response(['data' => []], 500),
             '*/api/viral-muda*' => Http::response(['max_umur' => 90, 'data' => []], 500),
         ]);
-        $this->get('/dashboard')->assertStatus(200)->assertSee('Server analisis mengembalikan error');
+        $this->get('/dashboard')->assertStatus(200)->assertSee('Server analisis mengembalikan error.');
     }
 }
