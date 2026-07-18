@@ -87,13 +87,26 @@ const initializeLandingExperience = () => {
     cleanupLandingExperience();
     cleanupLandingExperience = initLandingExperience();
 };
+let landingInitializationPending = false;
+const initializeLandingExperienceWhenReady = () => {
+    landingInitializationPending = false;
+    initializeLandingExperience();
+};
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeLandingExperience, { once: true });
+    landingInitializationPending = true;
+    document.addEventListener('DOMContentLoaded', initializeLandingExperienceWhenReady, { once: true });
 } else {
     initializeLandingExperience();
 }
 
 if (import.meta.hot) {
-    import.meta.hot.dispose(() => cleanupLandingExperience());
+    import.meta.hot.dispose(() => {
+        if (landingInitializationPending) {
+            document.removeEventListener('DOMContentLoaded', initializeLandingExperienceWhenReady);
+            landingInitializationPending = false;
+        }
+
+        cleanupLandingExperience();
+    });
 }
