@@ -17,6 +17,8 @@
         <p style="color:red">Server analisis tidak aktif. Jalankan: <code>uvicorn api:app --port 8000</code> di folder Backend.</p>
     @elseif ($status === 'no_data')
         <p style="color:orange">Belum ada data snapshot. Jalankan ingest dulu.</p>
+    @elseif ($status === 'error')
+        <p style="color:red">Server analisis mengembalikan error. Cek log uvicorn di folder Backend.</p>
     @elseif ($snapshot)
         <p>Snapshot #{{ $snapshot['snapshot_id'] }} — {{ $snapshot['game_count'] }} game — {{ $snapshot['taken_at'] }}</p>
     @endif

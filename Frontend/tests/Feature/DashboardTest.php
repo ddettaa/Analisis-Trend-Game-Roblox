@@ -42,4 +42,15 @@ class DashboardTest extends TestCase
         });
         $this->get('/')->assertStatus(200)->assertSee('uvicorn');
     }
+
+    public function test_shows_banner_when_error(): void
+    {
+        Http::fake([
+            '*/api/snapshot' => Http::response(['detail' => 'boom'], 500),
+            '*/api/genre/ranking' => Http::response(['ranking' => [], 'share' => []], 500),
+            '*/api/genre/saturation' => Http::response(['data' => []], 500),
+            '*/api/viral-muda*' => Http::response(['max_umur' => 90, 'data' => []], 500),
+        ]);
+        $this->get('/')->assertStatus(200)->assertSee('Server analisis mengembalikan error');
+    }
 }
