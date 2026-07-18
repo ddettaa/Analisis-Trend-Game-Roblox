@@ -1,0 +1,7 @@
+request
+
+pandas ==> 2.0.0
+
+matplotlib ==> 2.1.0
+
+jupyter ==> 2.0.0
