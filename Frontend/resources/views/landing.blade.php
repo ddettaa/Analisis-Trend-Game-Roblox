@@ -19,9 +19,7 @@
 
 <header class="sticky top-0 z-40 h-14 border-b border-border/70 bg-background/90 backdrop-blur">
     <nav aria-label="Navigasi utama" class="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <a href="/" aria-label="Analisis Trend Roblox" class="inline-flex items-center">
-            <x-analytics.brand-mark />
-        </a>
+        <x-analytics.brand-mark />
         <div class="flex items-center gap-2">
             <x-ui.button href="/dashboard" variant="outline" size="sm">Lihat Dashboard</x-ui.button>
             <x-analytics.theme-toggle />
@@ -145,8 +143,10 @@
                     });
                 </script>
             @elseif ($status === 'ok')
-                <x-ui.alert variant="neutral" title="Belum terbaca">
-                    Ranking genre belum tersedia untuk snapshot ini.
+                <x-ui.alert tone="neutral">
+                    <x-lucide-chart-no-axes-column />
+                    <x-ui.alert-title>Belum terbaca</x-ui.alert-title>
+                    <x-ui.alert-description>Ranking genre belum tersedia untuk snapshot ini.</x-ui.alert-description>
                 </x-ui.alert>
             @endif
         </div>

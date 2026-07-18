@@ -13,7 +13,9 @@ class LandingTest extends TestCase
             '*/api/snapshot' => Http::response(['snapshot_id' => 1, 'taken_at' => '2026-07-18T10:00:00Z', 'game_count' => 781], 200),
             '*/api/genre/ranking' => Http::response(['ranking' => [['genreL1' => 'Simulation', 'game_count' => 190, 'avg_visits' => 1, 'avg_playing' => 1, 'avg_rating' => 92]], 'share' => ['Simulation' => 100.0]], 200),
         ]);
-        $this->get('/')->assertStatus(200)
+        $response = $this->get('/');
+
+        $response->assertStatus(200)
             ->assertSee('Analisis Trend Roblox')
             ->assertSee('Lihat Dashboard')
             ->assertSee('781')
@@ -21,6 +23,8 @@ class LandingTest extends TestCase
             ->assertSee('data-page="landing"', false)
             ->assertSee('data-ui="ascii-field"', false)
             ->assertSee('Simulation');
+
+        $this->assertSame(1, substr_count($response->getContent(), 'href="/"'));
     }
 
     public function test_landing_survives_api_down(): void
@@ -40,8 +44,16 @@ class LandingTest extends TestCase
             '*/api/genre/ranking' => Http::response(['ranking' => [], 'share' => []], 200),
         ]);
 
-        $this->get('/')->assertOk()
+        $response = $this->get('/');
+
+        $response->assertOk()
             ->assertSee('Decode what Roblox plays.')
             ->assertSee('Belum terbaca');
+
+        $response->assertSeeInOrder([
+            'data-slot="alert-title"',
+            'Belum terbaca',
+            'Ranking genre belum tersedia',
+        ], false);
     }
 }
