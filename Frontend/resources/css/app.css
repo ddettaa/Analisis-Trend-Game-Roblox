@@ -154,6 +154,7 @@ body {
     --landing-ink: #080b19;
     --landing-blue: #1747e8;
     --landing-coral: #ff4b31;
+    --landing-coral-text: #c12a1d;
     --landing-mint: #5acda7;
     --landing-amber: #f2a43a;
     --landing-pink: #ed55bd;
@@ -171,6 +172,7 @@ body {
 .dark [data-page='landing'] {
     --landing-paper: #10121b;
     --landing-ink: #f4f0e6;
+    --landing-coral-text: #ff8574;
     --landing-sky: #172d43;
     --landing-rule: color-mix(in srgb, var(--landing-ink) 34%, transparent);
     background-image: radial-gradient(color-mix(in srgb, var(--landing-ink) 12%, transparent) 0.7px, transparent 0.8px);
@@ -573,7 +575,7 @@ body {
 }
 
 [data-page='landing'] .landing-research-item:nth-child(1) > p:first-child { color: var(--landing-blue); }
-[data-page='landing'] .landing-research-item:nth-child(2) > p:first-child { color: var(--landing-coral); }
+[data-page='landing'] .landing-research-item:nth-child(2) > p:first-child { color: var(--landing-coral-text); }
 [data-page='landing'] .landing-research-item:nth-child(3) > p:first-child { color: var(--landing-mint); }
 
 [data-page='landing'] .landing-research-item h3 {
@@ -611,7 +613,7 @@ body {
 
 [data-page='landing'] .landing-research-item a { grid-column: 4; }
 [data-page='landing'] .landing-research-item:nth-child(1) a { color: var(--landing-blue); }
-[data-page='landing'] .landing-research-item:nth-child(2) a { color: var(--landing-coral); }
+[data-page='landing'] .landing-research-item:nth-child(2) a { color: var(--landing-coral-text); }
 [data-page='landing'] .landing-research-item:nth-child(3) a { color: #218c71; }
 .dark [data-page='landing'] .landing-research-item:nth-child(3) a { color: var(--landing-mint); }
 
@@ -998,7 +1000,7 @@ body {
 }
 
 [data-page='landing'] .landing-note-1 a { color: var(--landing-blue); }
-[data-page='landing'] .landing-note-2 a { color: var(--landing-coral); }
+[data-page='landing'] .landing-note-2 a { color: var(--landing-coral-text); }
 [data-page='landing'] .landing-note-3 a { color: #218c71; }
 [data-page='landing'] .landing-note-4 a { color: #aa287e; }
 .dark [data-page='landing'] .landing-note-3 a { color: var(--landing-mint); }

@@ -34,6 +34,7 @@ class LandingTest extends TestCase
             ->assertSee('data-ui="paper-planes"', false)
             ->assertSee('data-ui="target-rings"', false)
             ->assertSee('data-ui="genre-ranking-list"', false)
+            ->assertSee('animations: { enabled: false }', false)
             ->assertSee('try {', false)
             ->assertDontSee('data-ui="ascii-field"', false);
 
