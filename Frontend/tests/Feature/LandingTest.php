@@ -17,18 +17,27 @@ class LandingTest extends TestCase
 
         $response->assertStatus(200)
             ->assertSee('Analisis Trend Roblox')
-            ->assertSee('Lihat Dashboard')
+            ->assertSee('Buka Dashboard')
             ->assertSee('781')
-            ->assertSee('Decode what Roblox plays.')
+            ->assertSee('Kami membaca bagaimana tren menjadi peluang.')
+            ->assertSee('Data adalah sebuah praktik.')
+            ->assertSee('Ranking')
+            ->assertSee('Saturasi')
+            ->assertSee('Momentum')
+            ->assertSee('Simulation')
             ->assertSee('data-page="landing"', false)
-            ->assertSee('data-ui="ascii-field"', false)
-            ->assertSee('sm:block', false)
+            ->assertSee('id="analisis"', false)
+            ->assertSee('id="sinyal"', false)
+            ->assertSee('id="metode"', false)
+            ->assertSee('id="catatan"', false)
+            ->assertSee('data-ui="signal-stream"', false)
+            ->assertSee('data-ui="paper-planes"', false)
+            ->assertSee('data-ui="target-rings"', false)
             ->assertSee('data-ui="genre-ranking-list"', false)
             ->assertSee('try {', false)
-            ->assertSee('Simulation');
+            ->assertDontSee('data-ui="ascii-field"', false);
 
         $this->assertSame(1, substr_count($response->getContent(), 'href="/"'));
-        $this->assertSame(2, substr_count($response->getContent(), 'data-ui="ascii-field"'));
     }
 
     public function test_landing_survives_api_down(): void
@@ -38,7 +47,7 @@ class LandingTest extends TestCase
         });
         $this->get('/')->assertStatus(200)
             ->assertSee('Analisis Trend Roblox')
-            ->assertSee('Lihat Dashboard');
+            ->assertSee('Kami membaca bagaimana tren menjadi peluang.');
     }
 
     public function test_landing_handles_empty_ranking(): void
@@ -51,7 +60,7 @@ class LandingTest extends TestCase
         $response = $this->get('/');
 
         $response->assertOk()
-            ->assertSee('Decode what Roblox plays.')
+            ->assertSee('Kami membaca bagaimana tren menjadi peluang.')
             ->assertSee('Belum terbaca');
 
         $response->assertSeeInOrder([
@@ -72,8 +81,8 @@ class LandingTest extends TestCase
         });
 
         $this->get('/')->assertOk()
-            ->assertSee('Decode what Roblox plays.')
-            ->assertSee('Lihat Dashboard')
+            ->assertSee('Kami membaca bagaimana tren menjadi peluang.')
+            ->assertSee('Buka Dashboard')
             ->assertSee('Server analisis tidak aktif.');
     }
 }

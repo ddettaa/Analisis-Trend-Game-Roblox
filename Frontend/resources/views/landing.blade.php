@@ -19,131 +19,142 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body data-page="landing" class="min-h-screen overflow-x-hidden bg-background text-foreground antialiased">
-@php($rankingItems = $ranking['ranking'] ?? [])
+@php
+    $rankingItems = is_array($ranking['ranking'] ?? null) ? $ranking['ranking'] : [];
+    $topGenres = array_slice($rankingItems, 0, 4);
+    $leader = $rankingItems[0] ?? null;
+    $snapshotId = $snapshot['snapshot_id'] ?? null;
+    $snapshotTime = $snapshot['taken_at'] ?? null;
+    $chartItems = array_map(function ($genre) {
+        return [
+            'genreL1' => $genre['genreL1'] ?? 'Belum terbaca',
+            'game_count' => (int) ($genre['game_count'] ?? 0),
+        ];
+    }, array_slice($rankingItems, 0, 5));
+@endphp
 
-<header class="sticky top-0 z-40 h-14 border-b border-border/70 bg-background/90 backdrop-blur">
-    <nav aria-label="Navigasi utama" class="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <x-analytics.brand-mark />
-        <div class="flex items-center gap-2">
-            <x-ui.button href="/dashboard" variant="outline" size="sm">Lihat Dashboard</x-ui.button>
+<header class="landing-header">
+    <nav aria-label="Navigasi utama" class="landing-nav">
+        <a href="/" aria-label="Analisis Trend Roblox — beranda" class="landing-brand">
+            <span class="landing-brand-tile" aria-hidden="true">R/</span>
+            <span>RblxLab</span>
+        </a>
+        <div class="landing-nav-links">
+            <a href="#analisis">Analisis</a>
+            <a href="#metode">Metode</a>
+            <a href="#catatan">Catatan</a>
+        </div>
+        <div class="landing-nav-actions">
             <x-analytics.theme-toggle />
+            <x-ui.button href="/dashboard" variant="outline" size="sm">Buka Dashboard</x-ui.button>
         </div>
     </nav>
 </header>
 
 <main>
-    <section class="relative isolate flex min-h-[calc(100vh-3.5rem)] items-center overflow-hidden px-4 py-16 sm:px-6 lg:px-8">
-        <div class="pointer-events-none absolute inset-0 -z-10 opacity-30" aria-hidden="true">
-            <x-analytics.ascii-field />
-        </div>
-        <div class="mx-auto w-full max-w-7xl">
-            <div class="max-w-4xl">
-                <p class="mb-5 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-primary">Analisis Trend Roblox / Live intelligence</p>
-                <h1 aria-label="Decode what Roblox plays." class="max-w-3xl text-5xl font-black tracking-[-0.05em] sm:text-7xl lg:text-8xl">
-                    Decode what <span class="text-primary">Roblox</span> plays.
-                </h1>
-                <p class="mt-7 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-                    Baca arah pasar Roblox dari sinyal yang sulit terlihat: genre yang menguat, ruang yang mulai padat, dan game muda yang bergerak cepat.
-                </p>
-                <div class="mt-9 flex flex-wrap items-center gap-3">
-                    <x-ui.button href="/dashboard" size="lg">Lihat Dashboard</x-ui.button>
-                    <p class="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">Data discovery, bukan tebakan</p>
-                </div>
+    <section class="landing-hero" aria-labelledby="landing-title">
+        <div class="landing-hero-copy">
+            <p class="landing-eyebrow">RblxLab / observatorium pasar</p>
+            <h1 id="landing-title" aria-label="Kami membaca bagaimana tren menjadi peluang.">
+                Kami membaca bagaimana<br>tren menjadi peluang.
+            </h1>
+            <p class="landing-hero-description">Studio riset independen untuk membaca permainan, genre, dan ruang tumbuh di Roblox sebelum semuanya menjadi ramai.</p>
+            <div class="landing-hero-actions">
+                <x-ui.button href="#sinyal" size="lg">Lihat sinyal</x-ui.button>
+                <span>Mulai dengan pertanyaan yang tepat.</span>
             </div>
+        </div>
+        <x-analytics.signal-stream />
+    </section>
+
+    <section class="landing-manifesto" aria-labelledby="manifesto-title">
+        <div>
+            <p class="landing-eyebrow">Manifesto</p>
+            <h2 id="manifesto-title">Data adalah sebuah praktik.</h2>
+            <p>Kami mengumpulkan, mempertanyakan, lalu menghubungkan sinyal yang biasanya tersembunyi di balik angka.</p>
+        </div>
+        <x-analytics.paper-planes />
+    </section>
+
+    <section id="analisis" class="landing-research" aria-labelledby="analisis-title">
+        <div class="landing-section-heading">
+            <p class="landing-eyebrow">Riset yang bisa ditindaklanjuti</p>
+            <h2 id="analisis-title">Bukan sekadar melihat pasar.</h2>
+        </div>
+        <div class="landing-research-list">
+            <article class="landing-research-item">
+                <p>01</p>
+                <h3>Ranking</h3>
+                <p>Petakan genre berdasarkan jumlah game agar besarnya pasar terlihat tanpa kabut.</p>
+                <a href="/dashboard">Baca ranking <span aria-hidden="true">↗</span></a>
+            </article>
+            <article class="landing-research-item">
+                <p>02</p>
+                <h3>Saturasi</h3>
+                <p>Temukan kategori yang mulai padat sebelum ide yang baik habis berebut perhatian.</p>
+                <a href="/dashboard/saturasi">Baca saturasi <span aria-hidden="true">↗</span></a>
+            </article>
+            <article class="landing-research-item">
+                <p>03</p>
+                <h3>Momentum</h3>
+                <p>Amati game muda yang bergerak cepat untuk menangkap pola sebelum menjadi kebiasaan.</p>
+                <a href="/dashboard/viral">Baca momentum <span aria-hidden="true">↗</span></a>
+            </article>
         </div>
     </section>
 
-    <section class="bg-primary px-4 py-5 text-primary-foreground sm:px-6 lg:px-8">
-        <div class="mx-auto flex max-w-7xl items-center gap-4 font-mono text-sm sm:text-base">
-            <x-analytics.ascii-field class="hidden shrink-0 sm:block" />
-            <p class="font-semibold tracking-tight">
-                @if ($snapshot)
-                    {{ number_format((int) $snapshot['game_count'], 0, ',', '.') }} games. One market signal.
-                @else
-                    Market signals, when data is ready.
-                @endif
-            </p>
+    <section id="sinyal" class="landing-signals" aria-labelledby="sinyal-title">
+        <div class="landing-section-heading">
+            <p class="landing-eyebrow">Snapshot saat ini</p>
+            <h2 id="sinyal-title">Sinyal untuk memulai.</h2>
         </div>
-    </section>
-
-    @if ($status === 'ok' && $snapshot)
-        <section aria-labelledby="metrics-heading" class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-            <div class="mx-auto max-w-7xl">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">Market pulse</p>
-                        <h2 id="metrics-heading" class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Sinyal pasar, dalam satu snapshot.</h2>
-                    </div>
-                    <p class="max-w-md text-sm leading-6 text-muted-foreground">Ringkas, terukur, dan siap menjadi titik awal eksplorasi lebih dalam.</p>
-                </div>
-                <div class="mt-8 grid gap-4 md:grid-cols-3">
-                    <x-ui.card class="p-6 sm:p-8">
-                        <p class="text-sm text-muted-foreground">Game dianalisis</p>
-                        <p class="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{{ number_format((int) $snapshot['game_count'], 0, ',', '.') }}</p>
-                    </x-ui.card>
-                    <x-ui.card class="p-6 sm:p-8">
-                        <p class="text-sm text-muted-foreground">Genre terpetakan</p>
-                        <p class="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{{ count($rankingItems) }}</p>
-                    </x-ui.card>
-                    <x-ui.card class="p-6 sm:p-8">
-                        <p class="text-sm text-muted-foreground">Genre teratas</p>
-                        <p class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">{{ $rankingItems[0]['genreL1'] ?? 'Belum terbaca' }}</p>
-                    </x-ui.card>
-                </div>
-            </div>
-        </section>
-    @else
-        <section class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-            <div class="mx-auto max-w-3xl">
-                <x-analytics.status-panel :status="$status" />
-            </div>
-        </section>
-    @endif
-
-    <section aria-labelledby="insights-heading" class="border-y border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-            <div>
-                <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">Editorial intelligence</p>
-                <h2 id="insights-heading" class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Tiga cara membaca pergerakan.</h2>
-                <p class="mt-5 max-w-md leading-7 text-muted-foreground">Dari volume genre sampai momentum game baru, dashboard menata data mentah menjadi keputusan yang bisa ditindaklanjuti.</p>
-            </div>
-            <div class="divide-y divide-border border-y border-border">
-                <article class="grid gap-3 py-5 sm:grid-cols-[10rem_1fr]">
-                    <h3 class="font-mono text-sm font-bold uppercase tracking-[0.12em]">Ranking Genre</h3>
-                    <p class="leading-7 text-muted-foreground">Lihat kategori yang membentuk pasar dan bandingkan besarnya peluang antar-genre.</p>
+        @if ($status === 'ok' && $snapshot)
+            <div class="landing-signal-grid">
+                <article class="landing-signal-card landing-signal-card-atlas">
+                    <p>Atlas</p>
+                    <h3>{{ number_format((int) ($snapshot['game_count'] ?? 0), 0, ',', '.') }} game</h3>
+                    <p>Skala semesta yang sedang kami baca.</p>
+                    <div id="minichart" class="landing-minichart"></div>
                 </article>
-                <article class="grid gap-3 py-5 sm:grid-cols-[10rem_1fr]">
-                    <h3 class="font-mono text-sm font-bold uppercase tracking-[0.12em]">Peta Saturasi</h3>
-                    <p class="leading-7 text-muted-foreground">Temukan area yang terlalu ramai sebelum waktu dan sumber daya masuk ke pasar yang sempit.</p>
+                <article class="landing-signal-card">
+                    <p>Lensa</p>
+                    <h3>{{ count($rankingItems) }} genre</h3>
+                    <p>Sudut pasar yang sudah terpetakan.</p>
                 </article>
-                <article class="grid gap-3 py-5 sm:grid-cols-[10rem_1fr]">
-                    <h3 class="font-mono text-sm font-bold uppercase tracking-[0.12em]">Viral Muda</h3>
-                    <p class="leading-7 text-muted-foreground">Tangkap game baru dengan traksi awal yang berpotensi membentuk pola permainan berikutnya.</p>
+                <article class="landing-signal-card">
+                    <p>Jejak</p>
+                    @if ($leader && isset($leader['genreL1'], $leader['game_count']))
+                        <h3>{{ $leader['genreL1'] }}</h3>
+                        <p>{{ number_format((int) $leader['game_count'], 0, ',', '.') }} game pada genre terdepan.</p>
+                    @else
+                        <h3>Belum terbaca</h3>
+                        <p>Genre terdepan menunggu data yang lengkap.</p>
+                    @endif
+                </article>
+                <article class="landing-signal-card">
+                    <p>Muse</p>
+                    <h3>#{{ $snapshotId ?? '—' }}</h3>
+                    <p>{{ $snapshotTime ?? 'Waktu snapshot belum tersedia.' }}</p>
                 </article>
             </div>
-        </div>
-    </section>
 
-    <section class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div class="mx-auto max-w-7xl">
             @if (count($rankingItems))
-                <x-ui.card class="overflow-hidden">
-                    <div class="border-b border-border px-6 py-5 sm:px-8">
-                        <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">Live ranking</p>
-                        <h2 id="genre-ranking-heading" class="mt-2 text-xl font-bold tracking-tight">Genre berdasarkan jumlah game</h2>
+                <div class="landing-ranking-panel">
+                    <div>
+                        <p class="landing-eyebrow">Lima genre terdepan</p>
+                        <h3>Komposisi pasar saat ini.</h3>
                     </div>
-                    <div id="minichart" aria-hidden="true" class="px-2 py-4 sm:px-6"></div>
-                    <ol data-ui="genre-ranking-list" class="sr-only" aria-label="Top 5 genre berdasarkan jumlah game">
+                    <ol data-ui="genre-ranking-list" aria-label="Top 5 genre berdasarkan jumlah game">
                         @foreach (array_slice($rankingItems, 0, 5) as $genre)
-                            <li>{{ $loop->iteration }}. {{ $genre['genreL1'] }}: {{ number_format((int) $genre['game_count'], 0, ',', '.') }} game</li>
+                            <li>{{ $loop->iteration }}. {{ $genre['genreL1'] ?? 'Belum terbaca' }}: {{ number_format((int) ($genre['game_count'] ?? 0), 0, ',', '.') }} game</li>
                         @endforeach
                     </ol>
-                </x-ui.card>
+                </div>
                 <script>
                     document.addEventListener('DOMContentLoaded', () => {
-                        const top5 = @json(array_slice($rankingItems, 0, 5));
+                        const top5 = @json($chartItems);
                         registerChart(document.querySelector('#minichart'), {
-                            chart: { type: 'bar', height: 280, toolbar: { show: false } },
+                            chart: { type: 'bar', height: 220, toolbar: { show: false } },
                             plotOptions: { bar: { horizontal: true, borderRadius: 2 } },
                             series: [{ name: 'Jumlah game', data: top5.map((item) => item.game_count) }],
                             xaxis: { categories: top5.map((item) => item.genreL1) },
@@ -151,32 +162,72 @@
                         });
                     });
                 </script>
-            @elseif ($status === 'ok')
+            @else
                 <x-ui.alert tone="neutral">
                     <x-lucide-chart-no-axes-column />
                     <x-ui.alert-title>Belum terbaca</x-ui.alert-title>
                     <x-ui.alert-description>Ranking genre belum tersedia untuk snapshot ini.</x-ui.alert-description>
                 </x-ui.alert>
             @endif
-        </div>
+        @else
+            <x-analytics.status-panel :status="$status" />
+        @endif
     </section>
 
-    <section class="bg-foreground px-4 py-16 text-background sm:px-6 lg:px-8 lg:py-24">
-        <div class="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <div class="max-w-3xl">
-                <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">Ready for the next signal?</p>
-                <h2 class="mt-3 text-4xl font-black tracking-[-0.04em] sm:text-5xl">Mulai dari data. Bergerak dengan keyakinan.</h2>
-            </div>
-            <x-ui.button href="/dashboard" size="lg" variant="secondary">Lihat Dashboard</x-ui.button>
+    <section id="metode" class="landing-process" aria-labelledby="metode-title">
+        <div class="landing-section-heading">
+            <p class="landing-eyebrow">Cara kerja</p>
+            <h2 id="metode-title">Data yang bisa diajak berdialog.</h2>
         </div>
+        <ol class="landing-process-list">
+            <li><span>01</span><strong>Temukan</strong><p>Mengumpulkan jejak pasar yang relevan.</p></li>
+            <li><span>02</span><strong>Bersihkan</strong><p>Menata data agar perbandingan berarti.</p></li>
+            <li><span>03</span><strong>Uji</strong><p>Menguji asumsi dari beberapa sudut.</p></li>
+            <li><span>04</span><strong>Tampilkan</strong><p>Membuat sinyal mudah dipakai.</p></li>
+        </ol>
+    </section>
+
+    <section class="landing-coral-cta" aria-labelledby="cta-title">
+        <div>
+            <p class="landing-eyebrow">Dari sinyal ke tindakan</p>
+            <h2 id="cta-title">Buka pola, bukan hanya halaman.</h2>
+            <x-ui.button href="/dashboard" size="lg">Buka Dashboard</x-ui.button>
+        </div>
+        <x-analytics.target-rings />
+    </section>
+
+    <section id="catatan" class="landing-notes" aria-labelledby="catatan-title">
+        <div class="landing-section-heading">
+            <p class="landing-eyebrow">Catatan lapangan</p>
+            <h2 id="catatan-title">Genre yang layak ditanya lagi.</h2>
+        </div>
+        @if (count($topGenres))
+            <div class="landing-note-grid">
+                @foreach ($topGenres as $genre)
+                    <article class="landing-note landing-note-{{ $loop->iteration }}">
+                        <p>Catatan {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</p>
+                        <h3>{{ $genre['genreL1'] ?? 'Belum terbaca' }}</h3>
+                        <p>{{ number_format((int) ($genre['game_count'] ?? 0), 0, ',', '.') }} game tercatat dalam snapshot ini.</p>
+                        <a href="/dashboard">Telusuri di dashboard <span aria-hidden="true">↗</span></a>
+                    </article>
+                @endforeach
+            </div>
+        @endif
+    </section>
+
+    <section class="landing-closing" aria-labelledby="closing-title">
+        <span class="landing-brand-tile" aria-hidden="true">R/</span>
+        <div>
+            <h2 id="closing-title">Bawa kami sebuah pertanyaan sulit.</h2>
+            <p>Kami akan mulai dari data yang tersedia, lalu mencari apa yang belum terbaca.</p>
+        </div>
+        <x-ui.button href="/dashboard" variant="outline" size="lg">Buka Dashboard</x-ui.button>
     </section>
 </main>
 
-<footer class="px-4 py-6 sm:px-6 lg:px-8">
-    <div class="mx-auto flex max-w-7xl flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <p class="font-mono font-bold tracking-[0.12em] text-foreground">ROBLOX.TRENDS</p>
-        <p>Data from Roblox discover &amp; games API</p>
-    </div>
+<footer class="landing-footer">
+    <p>RblxLab</p>
+    <p>Data dari Roblox Discover &amp; Games API.</p>
 </footer>
 </body>
 </html>
