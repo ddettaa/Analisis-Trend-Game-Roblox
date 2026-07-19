@@ -1,6 +1,9 @@
 import ApexCharts from 'apexcharts';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
 import './blatui';
 import { chartAnimationOptions } from './chart-preferences';
+import { initLandingExperience } from './landing-experience.js';
 
 window.ApexCharts = ApexCharts;
 
@@ -78,3 +81,32 @@ new MutationObserver(() => {
 }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
 syncColorScheme();
+
+let cleanupLandingExperience = () => {};
+const initializeLandingExperience = () => {
+    cleanupLandingExperience();
+    cleanupLandingExperience = initLandingExperience();
+};
+let landingInitializationPending = false;
+const initializeLandingExperienceWhenReady = () => {
+    landingInitializationPending = false;
+    initializeLandingExperience();
+};
+
+if (document.readyState === 'loading') {
+    landingInitializationPending = true;
+    document.addEventListener('DOMContentLoaded', initializeLandingExperienceWhenReady, { once: true });
+} else {
+    initializeLandingExperience();
+}
+
+if (import.meta.hot) {
+    import.meta.hot.dispose(() => {
+        if (landingInitializationPending) {
+            document.removeEventListener('DOMContentLoaded', initializeLandingExperienceWhenReady);
+            landingInitializationPending = false;
+        }
+
+        cleanupLandingExperience();
+    });
+}
