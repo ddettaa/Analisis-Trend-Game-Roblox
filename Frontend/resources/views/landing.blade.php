@@ -154,7 +154,7 @@
                     document.addEventListener('DOMContentLoaded', () => {
                         const top5 = @json($chartItems);
                         registerChart(document.querySelector('#minichart'), {
-                            chart: { type: 'bar', height: 220, toolbar: { show: false }, animations: { enabled: false } },
+                            chart: { type: 'bar', height: 128, toolbar: { show: false }, animations: { enabled: false } },
                             plotOptions: { bar: { horizontal: true, borderRadius: 2 } },
                             series: [{ name: 'Jumlah game', data: top5.map((item) => item.game_count) }],
                             xaxis: { categories: top5.map((item) => item.genreL1) },
