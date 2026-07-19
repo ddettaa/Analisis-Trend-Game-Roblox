@@ -21,7 +21,24 @@
 <body data-page="landing" class="min-h-screen overflow-x-hidden bg-background text-foreground antialiased">
 @php
     $rankingItems = is_array($ranking['ranking'] ?? null) ? $ranking['ranking'] : [];
-    $topGenres = array_slice($rankingItems, 0, 4);
+    $topGenres = [];
+
+    if ($status === 'ok' && $snapshot) {
+        foreach ($rankingItems as $genre) {
+            $genreName = is_array($genre) ? trim((string) ($genre['genreL1'] ?? '')) : '';
+            $gameCount = is_array($genre) ? ($genre['game_count'] ?? null) : null;
+
+            if ($genreName === '' || ! is_numeric($gameCount) || (int) $gameCount < 0) {
+                continue;
+            }
+
+            $topGenres[] = $genre;
+
+            if (count($topGenres) === 4) {
+                break;
+            }
+        }
+    }
     $leader = $rankingItems[0] ?? null;
     $snapshotId = $snapshot['snapshot_id'] ?? null;
     $snapshotTime = $snapshot['taken_at'] ?? null;
@@ -163,7 +180,7 @@
                     <p>Atlas</p>
                     <h3>{{ number_format((int) ($snapshot['game_count'] ?? 0), 0, ',', '.') }} game</h3>
                     <p>Skala semesta yang sedang kami baca.</p>
-                    <div id="minichart" class="landing-minichart"></div>
+                    <div id="minichart" data-ui="genre-ranking-chart" class="landing-minichart" aria-hidden="true" inert></div>
                 </article>
                 <article class="landing-signal-card">
                     <p>Lensa</p>

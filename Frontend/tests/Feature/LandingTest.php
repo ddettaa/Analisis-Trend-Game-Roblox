@@ -35,6 +35,7 @@ class LandingTest extends TestCase
             ->assertSee('data-ui="target-rings"', false)
             ->assertSee('data-ui="genre-ranking-list"', false)
             ->assertSee('class="sr-only"', false)
+            ->assertSee('<div id="minichart" data-ui="genre-ranking-chart" class="landing-minichart" aria-hidden="true" inert></div>', false)
             ->assertSee('data-ui="editorial-footer"', false)
             ->assertSee('aria-label="Navigasi footer"', false)
             ->assertSee('data-ui="footer-year"', false)
@@ -86,7 +87,10 @@ class LandingTest extends TestCase
     {
         Http::fake([
             '*/api/snapshot' => Http::response(['detail' => 'not found'], 404),
-            '*/api/genre/ranking' => Http::response(['ranking' => [], 'share' => []], 200),
+            '*/api/genre/ranking' => Http::response([
+                'ranking' => [['genreL1' => 'Simulation', 'game_count' => 999, 'avg_visits' => 1, 'avg_playing' => 1, 'avg_rating' => 92]],
+                'share' => ['Simulation' => 100.0],
+            ], 200),
         ]);
 
         $response = $this->get('/');
@@ -96,6 +100,7 @@ class LandingTest extends TestCase
             ->assertSee('data-ui="fallback-note"', false)
             ->assertSee('Periksa kesegaran data')
             ->assertDontSee('0 genre')
+            ->assertDontSee('999 game tercatat dalam snapshot ini.')
             ->assertDontSee('registerChart(document.querySelector', false);
 
         $this->assertSame(4, substr_count($response->getContent(), 'data-ui="fallback-note"'));

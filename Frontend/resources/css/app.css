@@ -1122,7 +1122,11 @@ body {
 }
 
 [data-page='landing'] .landing-footer-nav a {
+    display: inline-flex;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
     width: max-content;
+    align-items: center;
     color: inherit;
     text-decoration: none;
 }
@@ -1227,6 +1231,12 @@ body {
 @media (min-width: 33rem) and (max-width: 48rem) {
     [data-page='landing'] .landing-hero h1 {
         font-size: clamp(4.75rem, 12vw, 5.75rem);
+    }
+}
+
+@media (max-width: 36rem) {
+    [data-page='landing'] .landing-hero h1 {
+        font-size: clamp(4.25rem, 13.5vw, 4.75rem);
     }
 }
 
