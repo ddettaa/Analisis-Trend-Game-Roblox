@@ -738,7 +738,7 @@ body {
 
 [data-page='landing'] .landing-signal-card:nth-child(4)::before {
     right: -28%;
-    bottom: -36%;
+    bottom: -62%;
     width: 110%;
     aspect-ratio: 1;
     border: clamp(2.5rem, 5vw, 5.2rem) solid #080b19;
@@ -1155,6 +1155,12 @@ body {
     [data-page='landing'] .landing-closing > div { grid-column: 1 / -1; grid-row: 1; }
     [data-page='landing'] .landing-closing .landing-brand-tile { grid-column: 2; grid-row: 2; }
     [data-page='landing'] .landing-closing [data-slot='button'] { grid-column: 1; grid-row: 2; width: max-content; }
+}
+
+@media (min-width: 33rem) and (max-width: 48rem) {
+    [data-page='landing'] .landing-hero h1 {
+        font-size: clamp(4.75rem, 12vw, 5.75rem);
+    }
 }
 
 @media (max-width: 32rem) {
