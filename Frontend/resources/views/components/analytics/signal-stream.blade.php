@@ -13,7 +13,7 @@
     <path class="landing-stream-line landing-stream-line-coral" d="M99 441C126 379 175 354 286 313C386 276 421 236 428 180C433 146 455 128 493 128H580" />
     <path class="landing-stream-line landing-stream-line-pink" d="M126 444C151 394 194 372 304 332C405 295 440 257 446 202C450 169 472 153 509 153H590" />
 
-    <g class="landing-stream-node landing-stream-node-blue"><circle cx="373" cy="116" r="8" /><circle cx="373" cy="116" r="3" /></g>
-    <g class="landing-stream-node landing-stream-node-mint"><circle cx="461" cy="81" r="8" /><circle cx="461" cy="81" r="3" /></g>
-    <g class="landing-stream-node landing-stream-node-amber"><circle cx="477" cy="104" r="8" /><circle cx="477" cy="104" r="3" /></g>
+    <g class="landing-stream-node landing-stream-node-blue"><circle cx="565" cy="59" r="6" /><circle cx="584" cy="59" r="7" /><circle cx="605" cy="59" r="8" /><circle cx="629" cy="59" r="10" /></g>
+    <g class="landing-stream-node landing-stream-node-mint"><circle cx="575" cy="81" r="5" /><circle cx="593" cy="81" r="6" /><circle cx="613" cy="81" r="7" /><circle cx="635" cy="81" r="9" /></g>
+    <g class="landing-stream-node landing-stream-node-amber"><circle cx="584" cy="104" r="5" /><circle cx="601" cy="104" r="6" /><circle cx="620" cy="104" r="7" /><circle cx="641" cy="104" r="8" /></g>
 </svg>
