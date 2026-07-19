@@ -31,6 +31,47 @@
             'game_count' => (int) ($genre['game_count'] ?? 0),
         ];
     }, array_slice($rankingItems, 0, 5));
+    $fallbackNotes = [
+        [
+            'title' => 'Definisikan pertanyaan',
+            'copy' => 'Tetapkan kategori dan satuan analisis sebelum membandingkan sinyal pasar.',
+            'href' => '#metode',
+            'link' => 'Baca cara kerja',
+        ],
+        [
+            'title' => 'Periksa kesegaran data',
+            'copy' => 'Pastikan snapshot terbaru tersedia sebelum menarik kesimpulan tentang perubahan pasar.',
+            'href' => '#sinyal',
+            'link' => 'Periksa sinyal',
+        ],
+        [
+            'title' => 'Hubungkan tiga lensa',
+            'copy' => 'Baca ranking, saturasi, dan momentum bersama agar satu sinyal tidak berdiri sendiri.',
+            'href' => '#analisis',
+            'link' => 'Pelajari kerangka',
+        ],
+        [
+            'title' => 'Uji hipotesis',
+            'copy' => 'Gunakan dashboard untuk menguji pertanyaan ketika data berikutnya sudah tersedia.',
+            'href' => '/dashboard',
+            'link' => 'Buka dashboard',
+        ],
+    ];
+    $noteCards = [];
+
+    foreach ($topGenres as $genre) {
+        $noteCards[] = [
+            'title' => $genre['genreL1'] ?? 'Belum terbaca',
+            'copy' => number_format((int) ($genre['game_count'] ?? 0), 0, ',', '.').' game tercatat dalam snapshot ini.',
+            'href' => '/dashboard',
+            'link' => 'Telusuri di dashboard',
+            'fallback' => false,
+        ];
+    }
+
+    foreach (array_slice($fallbackNotes, 0, 4 - count($noteCards)) as $note) {
+        $noteCards[] = [...$note, 'fallback' => true];
+    }
 @endphp
 
 <header class="landing-header">
@@ -39,14 +80,19 @@
             <span class="landing-brand-tile" aria-hidden="true">R/</span>
             <span>RblxLab</span>
         </a>
-        <div class="landing-nav-links">
-            <a href="#analisis">Analisis</a>
-            <a href="#metode">Metode</a>
-            <a href="#catatan">Catatan</a>
+        <div class="landing-nav-links" data-ui="primary-nav-links">
+            <a href="#analisis" data-ui="primary-nav-link">Ranking</a>
+            <a href="#analisis" data-ui="primary-nav-link">Saturasi</a>
+            <a href="#analisis" data-ui="primary-nav-link">Momentum</a>
+            <a href="#metode" data-ui="primary-nav-link">Tentang</a>
+            <a href="#catatan" data-ui="primary-nav-link">Catatan Data</a>
         </div>
         <div class="landing-nav-actions">
             <x-analytics.theme-toggle />
-            <x-ui.button href="/dashboard" variant="outline" size="sm">Buka Dashboard</x-ui.button>
+            <x-ui.button href="/dashboard" variant="outline" size="sm" aria-label="Buka Dashboard" data-ui="dashboard-cta">
+                <span class="landing-dashboard-cta-label">Buka Dashboard</span>
+                <span class="landing-dashboard-cta-icon" aria-hidden="true">↗</span>
+            </x-ui.button>
         </div>
     </nav>
 </header>
@@ -56,7 +102,10 @@
         <div class="landing-hero-copy">
             <p class="landing-eyebrow">RblxLab / observatorium pasar</p>
             <h1 id="landing-title" aria-label="Kami membaca bagaimana tren menjadi peluang.">
-                Kami membaca bagaimana<br>tren menjadi peluang.
+                <span data-ui="hero-line">Kami membaca</span>
+                <span data-ui="hero-line">bagaimana</span>
+                <span data-ui="hero-line">tren menjadi</span>
+                <span data-ui="hero-line">peluang.</span>
             </h1>
             <p class="landing-hero-description">Studio riset independen untuk membaca permainan, genre, dan ruang tumbuh di Roblox sebelum semuanya menjadi ramai.</p>
             <div class="landing-hero-actions">
@@ -118,8 +167,13 @@
                 </article>
                 <article class="landing-signal-card">
                     <p>Lensa</p>
-                    <h3>{{ count($rankingItems) }} genre</h3>
-                    <p>Sudut pasar yang sudah terpetakan.</p>
+                    @if (count($rankingItems))
+                        <h3>{{ count($rankingItems) }} genre</h3>
+                        <p>Sudut pasar yang sudah terpetakan.</p>
+                    @else
+                        <h3>Belum terbaca</h3>
+                        <p>Sudut pasar menunggu ranking yang lengkap.</p>
+                    @endif
                 </article>
                 <article class="landing-signal-card">
                     <p>Jejak</p>
@@ -139,17 +193,11 @@
             </div>
 
             @if (count($rankingItems))
-                <div class="landing-ranking-panel">
-                    <div>
-                        <p class="landing-eyebrow">Lima genre terdepan</p>
-                        <h3>Komposisi pasar saat ini.</h3>
-                    </div>
-                    <ol data-ui="genre-ranking-list" aria-label="Top 5 genre berdasarkan jumlah game">
-                        @foreach (array_slice($rankingItems, 0, 5) as $genre)
-                            <li>{{ $loop->iteration }}. {{ $genre['genreL1'] ?? 'Belum terbaca' }}: {{ number_format((int) ($genre['game_count'] ?? 0), 0, ',', '.') }} game</li>
-                        @endforeach
-                    </ol>
-                </div>
+                <ol data-ui="genre-ranking-list" class="sr-only" aria-label="Top 5 genre berdasarkan jumlah game">
+                    @foreach (array_slice($rankingItems, 0, 5) as $genre)
+                        <li>{{ $loop->iteration }}. {{ $genre['genreL1'] ?? 'Belum terbaca' }}: {{ number_format((int) ($genre['game_count'] ?? 0), 0, ',', '.') }} game</li>
+                    @endforeach
+                </ol>
                 <script>
                     document.addEventListener('DOMContentLoaded', () => {
                         const top5 = @json($chartItems);
@@ -201,18 +249,19 @@
             <p class="landing-eyebrow">Catatan lapangan</p>
             <h2 id="catatan-title">Genre yang layak ditanya lagi.</h2>
         </div>
-        @if (count($topGenres))
-            <div class="landing-note-grid">
-                @foreach ($topGenres as $genre)
-                    <article class="landing-note landing-note-{{ $loop->iteration }}">
-                        <p>Catatan {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</p>
-                        <h3>{{ $genre['genreL1'] ?? 'Belum terbaca' }}</h3>
-                        <p>{{ number_format((int) ($genre['game_count'] ?? 0), 0, ',', '.') }} game tercatat dalam snapshot ini.</p>
-                        <a href="/dashboard">Telusuri di dashboard <span aria-hidden="true">↗</span></a>
-                    </article>
-                @endforeach
-            </div>
-        @endif
+        <div class="landing-note-grid" data-ui="note-grid">
+            @foreach ($noteCards as $note)
+                <article
+                    class="landing-note landing-note-{{ $loop->iteration }}"
+                    @if ($note['fallback']) data-ui="fallback-note" @endif
+                >
+                    <p>Catatan {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</p>
+                    <h3>{{ $note['title'] }}</h3>
+                    <p>{{ $note['copy'] }}</p>
+                    <a href="{{ $note['href'] }}">{{ $note['link'] }} <span aria-hidden="true">↗</span></a>
+                </article>
+            @endforeach
+        </div>
     </section>
 
     <section class="landing-closing" aria-labelledby="closing-title">
@@ -225,9 +274,37 @@
     </section>
 </main>
 
-<footer class="landing-footer">
-    <p>RblxLab</p>
-    <p>Data dari Roblox Discover &amp; Games API.</p>
+<footer class="landing-footer" data-ui="editorial-footer">
+    <div class="landing-footer-brand">
+        <span class="landing-brand-tile" aria-hidden="true">R/</span>
+        <div>
+            <p>RblxLab</p>
+            <p>Laboratorium sinyal untuk pasar Roblox.</p>
+        </div>
+    </div>
+    <nav class="landing-footer-nav" aria-label="Navigasi footer">
+        <div>
+            <p>Analisis</p>
+            <a href="#analisis">Ranking</a>
+            <a href="#analisis">Saturasi</a>
+            <a href="#analisis">Momentum</a>
+        </div>
+        <div>
+            <p>Studio</p>
+            <a href="#metode">Metodologi</a>
+            <a href="#catatan">Catatan Data</a>
+            <a href="/dashboard">Dashboard</a>
+        </div>
+    </nav>
+    <div class="landing-footer-source">
+        <p>Metode</p>
+        <p>Snapshot dibaca sebagai konteks pasar, bukan prediksi atau jaminan hasil.</p>
+        <p>Sumber: Roblox Discover &amp; Games API.</p>
+    </div>
+    <p class="landing-footer-legal">
+        <span>© <span data-ui="footer-year">{{ now()->year }}</span> RblxLab.</span>
+        <span>Riset independen untuk keputusan yang lebih jernih.</span>
+    </p>
 </footer>
 </body>
 </html>
